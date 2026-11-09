@@ -1,0 +1,25 @@
+{
+  "name": "مشكاة | رفيقك مع القرآن الكريم",
+  "short_name": "مشكاة",
+  "description": "مصحف المدينة وتلاوات متزامنة وقراءة وتفسير ومكتبة أحاديث.",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#08090a",
+  "theme_color": "#08090a",
+  "categories": [
+    "books",
+    "education",
+    "lifestyle"
+  ],
+  "icons": [
+    {
+      "src": "icons/logo-mishkat.png",
+      "sizes": "640x640",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

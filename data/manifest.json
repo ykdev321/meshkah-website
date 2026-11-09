@@ -1,0 +1,18 @@
+{
+  "quran_surahs": 114,
+  "quran_ayahs": 6236,
+  "reciters": 12,
+  "audio_urls": 1368,
+  "mp3_files_in_package": 0,
+  "timing_archives_sha256_verified": 10,
+  "notes": [
+    "Audio is streamed from provider URLs; no MP3 files are included in the site package.",
+    "All 12 listed reciters are represented as Hafs an Asim and provide 114 surah URLs each.",
+    "Ibrahim Al-Akdar and Ahmad ibn Ali Al-Ajmy were added from MP3Quran API catalog data.",
+    "Local word-timing archives are available for the original 10 reciters only.",
+    "Only canonical primary verse timing rows are used for synchronization.",
+    "Raad Al-Kurdi timing coverage excludes six verses; his audio chapter URLs are still listed.",
+    "Mushaf page layouts are downloaded from the cited page-layout source on demand and cached by the browser; browser storage may still be cleared or evicted."
+  ],
+  "app_version": "7.0.0"
+}

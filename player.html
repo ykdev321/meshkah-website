@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1, viewport-fit=cover" name="viewport"/>
+<meta content="#08090a" name="theme-color"/>
+<meta content="8.1.0" name="application-version"/>
+<meta content="مشغل مشكاة لتلاوة القرآن الكريم، مع اختيار السورة والقارئ والتحكم في الصوت والتقدم." name="description"/>
+<meta content="dark light" name="color-scheme"/>
+<title>مشغل مشكاة | القرآن الكريم</title>
+<link href="icons/logo-mishkat.png" rel="icon" type="image/png"/>
+<link href="manifest.webmanifest" rel="manifest"/>
+<link as="font" crossorigin="" href="assets/fonts/readex-pro-ar.woff2" rel="preload" type="font/woff2"/>
+<link as="font" crossorigin="" href="assets/fonts/noto-naskh-arabic-ar.woff2" rel="preload" type="font/woff2"/>
+<link href="assets/styles.css" rel="stylesheet"/>
+</head>
+<body class="player-standalone">
+<svg aria-hidden="true" class="svg-sprite" xmlns="http://www.w3.org/2000/svg">
+<symbol id="i-book" viewbox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v17H6.5A2.5 2.5 0 0 0 4 22.5z"></path><path d="M4 5.5v17M8 7h8M8 11h8M8 15h5"></path></symbol>
+<symbol id="i-search" viewbox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.8"></circle><path d="m16 16 5 5"></path></symbol>
+<symbol id="i-bookmark" viewbox="0 0 24 24"><path d="M6 4.5A1.5 1.5 0 0 1 7.5 3h9A1.5 1.5 0 0 1 18 4.5V22l-6-4-6 4z"></path></symbol>
+<symbol id="i-moon" viewbox="0 0 24 24"><path d="M20.5 15.4A8.8 8.8 0 0 1 8.6 3.5 8.9 8.9 0 1 0 20.5 15.4Z"></path></symbol>
+<symbol id="i-sun" viewbox="0 0 24 24"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></symbol>
+<symbol id="i-play" viewbox="0 0 24 24"><path d="m8 5 11 7-11 7z"></path></symbol>
+<symbol id="i-pause" viewbox="0 0 24 24"><path d="M8 5h3v14H8zM15 5h3v14h-3z"></path></symbol>
+<symbol id="i-prev" viewbox="0 0 24 24"><path d="M6 5v14M19 5 8 12l11 7z"></path></symbol>
+<symbol id="i-next" viewbox="0 0 24 24"><path d="M18 5v14M5 5l11 7-11 7z"></path></symbol>
+<symbol id="i-menu" viewbox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"></path></symbol>
+<symbol id="i-close" viewbox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"></path></symbol>
+<symbol id="i-download" viewbox="0 0 24 24"><path d="M12 3v12m-5-5 5 5 5-5M4 17v4h16v-4"></path></symbol>
+<symbol id="i-repeat" viewbox="0 0 24 24"><path d="m17 2 4 4-4 4M3 11V9a3 3 0 0 1 3-3h15M7 22l-4-4 4-4m14-1v2a3 3 0 0 1-3 3H3"></path></symbol>
+<symbol id="i-chevron" viewbox="0 0 24 24"><path d="m9 18 6-6-6-6"></path></symbol>
+<symbol id="i-headphones" viewbox="0 0 24 24"><path d="M3 13v-1a9 9 0 0 1 18 0v1M3 13h4v7H5a2 2 0 0 1-2-2zM21 13h-4v7h2a2 2 0 0 0 2-2z"></path></symbol>
+<symbol id="i-share" viewbox="0 0 24 24"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><path d="m8.7 10.7 6.6-4.4m-6.6 7 6.6 4.1"></path></symbol>
+<symbol id="i-grid" viewbox="0 0 24 24"><rect height="6" rx="1.4" width="6" x="3.5" y="3.5"></rect><rect height="6" rx="1.4" width="6" x="14.5" y="3.5"></rect><rect height="6" rx="1.4" width="6" x="3.5" y="14.5"></rect><rect height="6" rx="1.4" width="6" x="14.5" y="14.5"></rect></symbol>
+<symbol id="i-expand" viewbox="0 0 24 24"><path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"></path></symbol>
+<symbol id="i-collapse" viewbox="0 0 24 24"><path d="M3 8h5V3M21 8h-5V3M3 16h5v5M21 16h-5v5"></path></symbol>
+<symbol id="i-check" viewbox="0 0 24 24"><path d="m5 12.5 4.4 4.4L19 6.7"></path></symbol>
+<symbol id="i-info" viewbox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M12 10.5V17M12 7.2v.2"></path></symbol>
+<symbol id="i-mail" viewbox="0 0 24 24"><rect height="14" rx="3" width="18" x="3" y="5"></rect><path d="m4 7 8 6 8-6"></path></symbol>
+<symbol id="i-list" viewbox="0 0 24 24"><path d="M8 5h13M8 12h13M8 19h13M3.5 5h.1M3.5 12h.1M3.5 19h.1"></path></symbol>
+<symbol id="i-arrow" viewbox="0 0 24 24"><path d="M19 12H5m6-6-6 6 6 6"></path></symbol>
+<symbol id="i-spark" viewbox="0 0 24 24"><path d="M12 2.8c.6 5.1 3.1 7.6 8.2 8.2-5.1.6-7.6 3.1-8.2 8.2-.6-5.1-3.1-7.6-8.2-8.2 5.1-.6 7.6-3.1 8.2-8.2Z"></path></symbol>
+</svg>
+<div class="app">
+<header class="topbar" id="topbar">
+<div class="topbar-inner">
+<button aria-controls="library-panel" aria-expanded="false" aria-label="فتح فهرس السور" class="icon-btn mobile-menu" id="mobile-menu">
+<svg><use href="#i-menu"></use></svg>
+</button>
+<a aria-label="القرآن الكريم — الصفحة الرئيسية" class="brand" href="index.html">
+<img alt="" class="brand-logo" height="46" src="icons/logo-mishkat.png" width="46"/>
+<span class="brand-copy"><strong>مشكاة</strong><small>رفيقك مع القرآن الكريم</small></span>
+</a>
+<nav aria-label="التنقل الرئيسي" class="main-nav">
+<button class="nav-link active" data-nav="home">الرئيسية</button>
+<button class="nav-link" data-nav="reader">المصحف</button>
+<a aria-current="page" aria-label="فتح مشغل السور" class="nav-link active" data-nav="listen" href="player.html">التلاوة</a>
+<button class="nav-link" data-nav="saved">المحفوظات</button>
+<a class="nav-link nav-about" href="about.html">عن الموقع</a>
+</nav>
+<div class="topbar-actions">
+<button aria-label="بحث في القرآن" class="glass-action search-action" id="search-open">
+<svg><use href="#i-search"></use></svg><span>بحث</span><kbd aria-hidden="true">⌘K</kbd>
+</button>
+<button aria-label="تغيير المظهر" class="glass-icon" id="theme-toggle" title="تغيير المظهر"><svg><use href="#i-moon"></use></svg></button>
+</div>
+</div>
+</header>
+<main class="page-shell" id="top">
+<section aria-label="لوحة مشكاة الرئيسية" class="home-dashboard" id="home-dashboard">
+<div class="home-intro glass-panel">
+<div class="home-brand-lockup">
+<img alt="شعار مشكاة" height="104" src="icons/logo-mishkat.png" width="104"/>
+<div><span class="eyebrow">رفيقك في تلاوة القرآن</span><h1>مشكاة</h1><p>مساحة هادئة لقراءة كتاب الله والاستماع إليه بتدبّر.</p></div>
+</div>
+<div class="daily-verse-box">
+<div class="daily-verse-heading"><span class="eyebrow">آية اليوم</span><span class="daily-verse-ornament">۞</span></div>
+<blockquote dir="rtl" id="daily-verse-text" lang="ar">يتم تجهيز آية اليوم…</blockquote>
+<div class="daily-verse-reference" id="daily-verse-reference">القرآن الكريم</div>
+<div class="daily-verse-actions">
+<button class="btn btn-primary" id="daily-ayah-play"><svg><use href="#i-play"></use></svg><span>استمع إلى الآية</span></button>
+<button class="btn btn-ghost" id="daily-ayah-open">افتح موضعها</button>
+</div>
+</div>
+<button class="btn btn-ghost" id="hero-browse"><svg><use href="#i-book"></use></svg><span>تصفح المصحف</span></button>
+<button class="home-continue" id="dashboard-continue"><span>متابعة من حيث وصلت</span><strong id="dashboard-last-read">سورة الفاتحة · الآية ١</strong><svg><use href="#i-arrow"></use></svg></button>
+</div>
+<div class="dashboard-main glass-panel">
+<div class="dashboard-header"><div><span class="eyebrow">مساحتك القرآنية</span><h2 id="dashboard-view-title">تقدّمي</h2></div><span class="dashboard-date" id="dashboard-date"></span></div>
+<nav aria-label="أقسام لوحة مشكاة" class="dashboard-tabs">
+<button aria-pressed="true" class="dashboard-tab active" data-dashboard-view="progress">تقدّمي</button>
+<button aria-pressed="false" class="dashboard-tab" data-dashboard-view="surah">بيانات السور</button>
+<button aria-pressed="true" class="dashboard-tab active" data-dashboard-view="player">المشغّل</button>
+<button aria-pressed="false" class="dashboard-tab" data-dashboard-view="tafsir">التفسير</button>
+<button aria-pressed="false" class="dashboard-tab" data-dashboard-view="hadith">الأحاديث</button>
+</nav>
+<section aria-label="تقدمي" class="dashboard-view active" data-view-panel="progress" hidden="True">
+<div class="progress-hero-card">
+<div><span class="eyebrow">رحلتك في المصحف</span><strong id="progress-percentage">٠٪</strong><small id="progress-position">الصفحة ١ من ٦٠٤</small></div>
+<div aria-label="نسبة التقدم" class="progress-ring" id="progress-ring" role="img"><span id="progress-ring-value">٠٪</span></div>
+</div>
+<div class="progress-stats-grid">
+<article class="progress-stat"><span>آيات استمعت إليها</span><strong id="listened-count">٠</strong></article>
+<article class="progress-stat"><span>علاماتك المرجعية</span><strong id="bookmark-total">٠</strong></article>
+<article class="progress-stat"><span>صفحات محفوظة دون اتصال</span><strong dir="ltr" id="offline-pages-count">٠ / ٦٠٤</strong></article>
+<article class="progress-stat"><span>موضع قراءتك الأخير</span><strong id="progress-last-read">الفاتحة · ١</strong></article>
+</div>
+<div class="progress-detail-grid">
+<article class="progress-detail"><span class="eyebrow">آخر سورة استمعت إليها</span><strong id="last-listened-surah">لم تبدأ الاستماع بعد</strong><small id="last-listened-ayah">—</small></article>
+<article class="progress-detail"><span class="eyebrow">القارئ المختار</span><strong id="progress-reciter">—</strong><small>رواية حفص عن عاصم</small></article>
+</div>
+<div class="progress-page-actions"><p class="dashboard-note">يُحتسب التقدم من الصفحات التي تؤكد قراءتها بنفسك، وليس من مجرد التنقل بينها.</p><button class="btn btn-ghost" id="share-progress-open"><svg><use href="#i-share"></use></svg><span>مشاركة تقدّمي</span></button></div>
+</section>
+<section aria-label="بيانات السور" class="dashboard-view" data-view-panel="surah" hidden="True">
+<div class="surah-information-head"><div><span class="eyebrow">معلومات السورة</span><h3 id="surah-info-name">الفاتحة</h3><p id="surah-info-subtitle">السورة رقم ١</p></div><label class="dashboard-select-label">اختر السورة<select aria-label="اختر سورة لعرض بياناتها" id="dashboard-surah-select"></select></label></div>
+<div class="surah-info-grid" id="surah-info-grid"></div>
+<p class="dashboard-note">نعرض البيانات الثابتة الموجودة في مصدر المصحف. لم نضف سنة نزول هجرية لأن ملفات المشروع لا تتضمن تاريخاً موثقاً موحداً لكل سورة.</p>
+<button class="btn btn-ghost" id="surah-info-open">افتح السورة في المصحف</button>
+</section>
+<section aria-label="مشغل السور" class="dashboard-view player-studio-page active" data-view-panel="player">
+<div class="studio-heading"><div><span class="eyebrow">استمع كما تحب</span><h3>مشغّل مشكاة</h3><p>اختر السورة والقارئ، وتحكّم في التلاوة من مكان واحد.</p></div><span class="studio-live"><i></i> بث صوتي</span></div>
+<div class="player-studio-grid">
+<aside aria-label="قائمة القراء" class="studio-column studio-reciter-column">
+<div class="studio-column-head"><strong>القرّاء</strong><span id="studio-reciter-count">١٢ قارئاً</span></div>
+<label class="studio-search"><svg><use href="#i-search"></use></svg><input autocomplete="off" id="studio-reciter-search" placeholder="ابحث عن قارئ…" type="search"/></label>
+<div class="studio-list" id="studio-reciter-list"><p class="dashboard-note">يتم تجهيز القراء…</p></div>
+</aside>
+<section aria-label="عناصر التحكم بالصوت" class="studio-center">
+<div class="studio-now-playing"><span class="eyebrow">يُشغَّل الآن</span><div class="record-wrap"><div class="record-disc" id="record-disc"><div class="record-label"><img alt="" src="icons/logo-mishkat.png"/><span>مشكاة</span></div></div></div><h3 id="album-surah-name">سورة الفاتحة</h3><p id="album-reciter-name">اختر قارئك المفضل</p><div class="studio-ayah-label" id="studio-ayah-label">الآية ١ · جاهز للاستماع</div>
+<div class="album-actions"><button class="btn btn-ghost" id="album-open-mushaf">عرض السورة في المصحف</button></div>
+</div>
+<div class="studio-progress-block"><div class="studio-time-row"><span id="studio-current-time">٠:٠٠</span><span id="studio-duration">٠:٠٠</span></div><input aria-label="التقدم في التلاوة" disabled="" id="studio-progress" max="1000" min="0" type="range" value="0"/><div class="studio-progress-caption"><span>بداية التلاوة</span><span>نهاية السورة</span></div></div>
+<div class="album-playback-controls studio-transport"><button aria-label="السورة السابقة" class="player-control" id="album-prev-surah"><svg class="mirror-icon"><use href="#i-next"></use></svg></button><button aria-label="تشغيل" class="player-main" id="album-play-toggle"><svg><use href="#i-play"></use></svg></button><button aria-label="السورة التالية" class="player-control" id="album-next-surah"><svg><use href="#i-next"></use></svg></button></div>
+<div class="studio-volume-row"><button aria-label="كتم الصوت" class="studio-mute" id="studio-mute" title="كتم الصوت">◖))</button><input aria-label="مستوى الصوت" id="studio-volume" max="1" min="0" step="0.01" type="range" value="0.85"/><label class="speed-wrap"><span>السرعة</span><select aria-label="سرعة التشغيل" id="studio-speed"><option value="0.75">٠٫٧٥×</option><option value="0.9">٠٫٩×</option><option selected="" value="1">١×</option><option value="1.1">١٫١×</option><option value="1.25">١٫٢٥×</option></select></label></div>
+<div class="album-modes studio-modes"><button aria-pressed="false" class="mode-pill" id="album-repeat">↻ تكرار السورة</button><button aria-pressed="true" class="mode-pill active" id="album-auto-next">⇥ الانتقال للسورة التالية</button></div>
+<p class="dashboard-note studio-note">الصوت يُبث عند الطلب ولا تُنزّل ملفات MP3 تلقائياً. يعمل النص والتخطيط دون اتصال بعد حفظهما على الجهاز، أما الصوت فيحتاج اتصالاً.</p>
+</section>
+<aside aria-label="قائمة السور" class="studio-column studio-surah-column">
+<div class="studio-column-head"><strong>سور القرآن</strong><span>١١٤ سورة</span></div>
+<label class="studio-search"><svg><use href="#i-search"></use></svg><input autocomplete="off" id="studio-surah-search" placeholder="ابحث عن سورة…" type="search"/></label>
+<div class="studio-list" id="studio-surah-list"><p class="dashboard-note">يتم تجهيز السور…</p></div>
+</aside>
+</div>
+</section>
+<section aria-label="تفسير الآيات" class="dashboard-view" data-view-panel="tafsir" hidden="True">
+<div class="surah-information-head"><div><span class="eyebrow">معاني الآيات</span><h3>تفسير القرآن الكريم</h3><p>خمسة مصادر من ملفات التفسير المرفقة</p></div></div>
+<div class="tafsir-filters"><label class="dashboard-select-label">السورة<select id="tafsir-surah-select"></select></label><label class="dashboard-select-label">رقم الآية<input aria-label="أدخل رقم الآية" id="tafsir-ayah-number" inputmode="numeric" min="1" step="1" type="number" value="1"/></label><label class="dashboard-select-label">المفسّر<select id="tafsir-source-select"><option>التفسير الميسر</option><option>تفسير ابن كثير</option><option>تفسير السعدي</option><option>تفسير القرطبي</option><option>تفسير الطبري</option></select></label></div>
+<div class="tafsir-verse-box"><span class="eyebrow">الآية الكريمة</span><p id="tafsir-verse-text"></p></div>
+<article class="tafsir-text-card"><header><span class="eyebrow" id="tafsir-source-label">التفسير الميسر</span><button aria-label="استمع إلى الآية" class="icon-btn" id="tafsir-read-ayah" title="استمع إلى الآية">▷</button></header><p id="tafsir-text">اختر سورة وآية لعرض التفسير.</p></article>
+<p class="dashboard-note">الملفات مرفقة بالمشروع وتُحمّل سورة واحدة عند الطلب. هذه مجموعة بيانات مجمّعة؛ يُستحسن مراجعة النصوص مقابل طبعات موثوقة من كتب التفسير قبل الاعتماد البحثي.</p>
+</section>
+<section aria-label="الأربعون النووية" class="dashboard-view" data-view-panel="hadith" hidden="True">
+<div class="hadith-heading"><span class="eyebrow">من جوامع الكلم</span><h3 id="hadith-heading-title">مكتبة الأحاديث</h3><p>متون من مجموعات حديثية معروفة، مع إظهار اسم الكتاب ورقم الحديث.</p></div>
+<label class="dashboard-select-label hadith-collection-label">مصدر الأحاديث<select id="hadith-collection"><option value="nawawi">الأربعون النووية</option><option value="bukhari">صحيح البخاري</option><option value="muslim">صحيح مسلم</option><option value="abudawud">سنن أبي داود</option><option value="tirmidhi">جامع الترمذي</option><option value="nasai">سنن النسائي</option><option value="ibnmajah">سنن ابن ماجه</option></select></label>
+<label class="dashboard-select-label hadith-search-label">ابحث في الأحاديث<input id="hadith-search" placeholder="ابحث بكلمة من الحديث…" type="search"/></label>
+<div class="hadith-layout"><div class="hadith-list" id="hadith-list"><p class="dashboard-note">سيتم تجهيز الأحاديث محلياً عند فتح هذا القسم أول مرة.</p></div><article class="hadith-reading-card" id="hadith-reading-card"><span class="eyebrow">الحديث المختار</span><h3 id="hadith-title">الأربعون النووية</h3><p id="hadith-text">اختر كتاباً من القائمة لعرض متونه. تُحمّل المجموعة عند الطلب وتُحفظ محلياً بعد نجاح التنزيل.</p><small id="hadith-reference"></small></article></div>
+<p class="dashboard-note">المتون من نسخ عربية منشورة في مشروع Hadith API. بعض كتب السنن تضم الصحيح والحسن والضعيف؛ اسم الكتاب ليس حكماً على درجة كل حديث. اعرض درجة الحديث فقط عندما تكون مرفقة بمرجع موثوق.</p>
+</section>
+</div>
+</section>
+<section aria-label="المصحف وفهرس السور" class="workspace" id="reader">
+<aside class="library-panel glass-panel" id="library-panel">
+<div class="panel-heading">
+<div><span class="eyebrow">الفهرس</span><h2>السور الكريمة</h2></div>
+<button aria-label="إغلاق الفهرس" class="icon-btn library-close" id="library-close"><svg><use href="#i-close"></use></svg></button>
+<span class="surah-count">١١٤</span>
+</div>
+<div aria-label="فهرس المصحف" class="library-tabs" role="tablist">
+<button aria-selected="true" class="library-tab active" data-library="surahs" role="tab">السور</button>
+<button aria-selected="false" class="library-tab" data-library="bookmarks" role="tab">المحفوظات <span id="bookmark-count">٠</span></button>
+</div>
+<label class="search-field">
+<svg><use href="#i-search"></use></svg>
+<input aria-label="ابحث عن سورة" autocomplete="off" id="surah-search" placeholder="ابحث عن سورة..." type="search"/>
+</label>
+<div aria-live="polite" class="surah-list" id="surah-list"><div class="loading-line">يتم تجهيز الفهرس...</div></div>
+<div class="library-footer"><span class="live-dot"></span> رواية حفص عن عاصم</div>
+</aside>
+<section aria-label="قارئ المصحف" class="reader-column" id="reader-panel">
+<div class="reader-top glass-panel">
+<div class="reader-position">
+<span class="position-emblem">۞</span>
+<div><small>موضع القراءة</small><strong id="reader-location-text">سورة الفاتحة · الآية ١</strong></div>
+</div>
+<div class="reader-tools">
+<div aria-label="حجم الخط" class="tool-group">
+<button aria-label="تصغير الخط" class="setting-button" id="font-smaller">A−</button>
+<button aria-label="تكبير الخط" class="setting-button" id="font-larger">A+</button>
+<button aria-label="استعادة حجم الخط المريح" class="setting-button font-reset" id="font-reset" title="استعادة حجم الخط المريح">↺</button>
+</div>
+<button aria-pressed="false" class="setting-button translation-button" id="translation-toggle">الترجمة</button>
+<button aria-label="فهرس صفحات المصحف" class="icon-btn" id="page-index-btn" title="فهرس صفحات المصحف"><svg><use href="#i-grid"></use></svg></button>
+<button aria-label="الشاشة كاملة — تكبير صفحة المصحف" class="icon-btn" id="focus-mode-btn" title="الشاشة كاملة"><svg><use href="#i-expand"></use></svg></button>
+</div>
+<div class="page-jump">
+<label for="page-number-input">صفحة</label>
+<input aria-label="رقم الصفحة" id="page-number-input" inputmode="numeric" max="604" min="1" type="number" value="1"/>
+<span id="page-total">/ ٦٠٤</span>
+</div>
+</div>
+<div class="recitation-bar glass-panel" id="listen">
+<button aria-controls="reciter-dialog" aria-haspopup="dialog" class="reciter-current" id="reciter-picker-open">
+<span class="avatar" id="reciter-current-avatar">ن</span>
+<span class="reciter-current-copy">
+<small>القارئ الحالي</small>
+<strong id="reciter-current-name">جارٍ التحميل...</strong>
+<em id="reciter-current-en">Hafs an Asim</em>
+</span>
+<svg class="chevron"><use href="#i-chevron"></use></svg>
+</button>
+<div class="recitation-actions">
+<span class="live-badge"><span></span> حفص عن عاصم</span>
+<button class="btn btn-listen" id="play-surah"><svg><use href="#i-play"></use></svg><span>استمع للسورة</span></button>
+</div>
+<select aria-hidden="true" class="sr-only" id="reciter-select" tabindex="-1"></select>
+</div>
+<div class="reader-message" hidden="" id="reader-message" role="status"></div>
+<div class="mushaf-stage" id="mushaf-stage">
+<div aria-label="صفحة المصحف" class="mushaf-page" id="mushaf-page">
+<div class="mushaf-topline"><span>﷽</span><span class="mushaf-ornament">۞</span></div>
+<div class="mushaf-page-heading" id="surah-heading"><span>مصحف المدينة · رواية حفص عن عاصم</span></div>
+<div class="mushaf-basmalah" hidden="" id="mushaf-basmalah">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div>
+<div class="quran-content" dir="rtl" id="quran-content" lang="ar"><div class="loading-state">تُفتَح صفحات المصحف...</div></div>
+<div class="mushaf-page-footer"><span class="mushaf-page-number" id="mushaf-page-number">١</span></div>
+</div>
+</div>
+<div aria-label="أدوات صفحة المصحف" class="page-actions glass-panel">
+<button class="page-tool" id="previous-page" title="الصفحة السابقة"><svg class="mirror-icon"><use href="#i-next"></use></svg><span>السابقة</span></button>
+<button aria-pressed="false" class="page-tool repeat-page" id="repeat-page" title="تكرار الصفحة"><svg><use href="#i-repeat"></use></svg><span>تكرار الصفحة</span></button>
+<button class="page-tool" id="download-page-image" title="تحميل صورة الصفحة"><svg><use href="#i-download"></use></svg><span>تحميل صورة</span></button>
+<button class="page-tool" id="open-in-surah-player" title="فتح السورة الحالية في المشغل"><svg><use href="#i-headphones"></use></svg><span>الفتح في مشغل السور</span></button>
+<button class="page-tool download-audio" id="download-surah-audio" title="تحميل ملف MP3 للسورة الحالية"><svg><use href="#i-download"></use></svg><span>تحميل السورة</span></button>
+<button class="page-tool" id="focus-page-btn" title="الشاشة كاملة — تكبير صفحة المصحف"><svg><use href="#i-expand"></use></svg><span>الشاشة كاملة</span></button>
+<button class="page-tool next-page" id="next-page" title="الصفحة التالية"><span>الصفحة التالية</span><svg><use href="#i-next"></use></svg></button>
+<button aria-pressed="false" class="page-tool page-read-confirm" id="confirm-page-read" title="تأكيد أنك قرأت هذه الصفحة"><svg><use href="#i-check"></use></svg><span>أنهيت قراءة الصفحة</span></button></div>
+<div class="page-status"><span id="page-counter">الصفحة ١ من ٦٠٤</span><span class="page-status-separator">✦</span><span>نص المصحف محلي · التلاوة عبر الإنترنت</span></div>
+</section>
+</section>
+<footer class="site-footer glass-panel">
+<div class="footer-brand">
+<img alt="" height="34" src="icons/logo-mishkat.png" width="34"/>
+<div><strong>مشكاة</strong><small>رفيقك مع القرآن الكريم</small></div>
+</div>
+<p class="footer-dua">اللَّهُمَّ اجْعَلِ الْقُرْآنَ رَبِيعَ قُلُوبِنَا وَنُورَ صُدُورِنَا</p>
+<div class="footer-links">
+<a href="mailto:ykdev321@gmail.com">تواصل معنا</a>
+</div>
+<div class="footer-credit"><span>صنع بواسطة</span><strong>YKdev</strong><i>•</i><a href="mailto:ykdev321@gmail.com">ykdev321@gmail.com</a></div>
+<div class="footer-sources">تخطيط صفحات المصحف: <a href="https://github.com/ouryhamdalaye/madinah-mushaf-json" rel="noopener" target="_blank">Madinah Mushaf JSON · CC BY-SA 4.0</a></div>
+<div class="footer-about-bottom"><a aria-label="اقرأ عن موقع مشكاة" href="about.html"><svg><use href="#i-info"></use></svg><span>عن الموقع</span></a></div>
+<nav aria-label="روابط الموقع" class="footer-links"><a href="about.html">عن مشكاة</a><a href="privacy.html">سياسة الخصوصية</a></nav></footer>
+</main>
+</div>
+<div class="focus-bar glass-panel" hidden="" id="mushaf-focus-bar">
+<button aria-label="إغلاق عرض المصحف الكامل" class="icon-btn focus-exit" id="focus-exit"><svg><use href="#i-close"></use></svg></button>
+<div class="focus-title"><span class="eyebrow">الشاشة كاملة</span><strong id="focus-title-text">الصفحة ١ من ٦٠٤</strong></div>
+<div class="focus-controls">
+<button aria-label="الصفحة السابقة" class="icon-btn" id="focus-prev"><svg class="mirror-icon"><use href="#i-next"></use></svg></button>
+<label class="focus-page-jump"><input aria-label="رقم الصفحة" id="focus-page-input" inputmode="numeric" max="604" min="1" type="number" value="1"/><span id="focus-page-total">/ ٦٠٤</span></label>
+<button aria-label="الصفحة التالية" class="icon-btn" id="focus-next"><svg><use href="#i-next"></use></svg></button>
+<span aria-hidden="true" class="focus-divider"></span>
+<button aria-label="تصغير الخط" class="setting-button" id="focus-zoom-out">A−</button>
+<button aria-label="تكبير الخط" class="setting-button" id="focus-zoom-in">A+</button>
+<button aria-label="استعادة حجم الخط المريح" class="setting-button font-reset" id="focus-zoom-reset" title="استعادة حجم الخط المريح">↺</button>
+<button class="focus-chip" id="focus-page-index"><svg><use href="#i-grid"></use></svg><span>الفهرس</span></button>
+<button aria-label="ملء الشاشة" class="icon-btn" id="focus-fullscreen" title="ملء الشاشة"><svg><use href="#i-expand"></use></svg></button>
+</div>
+</div>
+<section aria-label="مشغل التلاوة" class="player-dock glass-panel" id="player-dock">
+<div class="player-info">
+<div class="player-avatar" id="player-avatar">ق</div>
+<div class="player-track"><strong id="player-reciter">اختر قارئًا</strong><span id="player-surah">جاهز للاستماع</span></div>
+</div>
+<div class="player-center">
+<div class="player-controls">
+<button aria-label="الآية السابقة" class="player-control" id="previous-ayah"><svg><use href="#i-prev"></use></svg></button>
+<button aria-label="تشغيل" class="player-main" id="player-toggle"><svg><use href="#i-play"></use></svg></button>
+<button aria-label="الآية التالية" class="player-control" id="next-ayah"><svg><use href="#i-next"></use></svg></button>
+</div>
+<div class="progress-row"><span id="current-time">٠:٠٠</span><input aria-label="موضع التلاوة" id="audio-progress" max="1000" min="0" type="range" value="0"/><span id="total-time">٠:٠٠</span></div>
+</div>
+<div class="player-extra">
+<label class="speed-wrap"><span>السرعة</span><select aria-label="سرعة التشغيل" id="playback-speed"><option value="0.75">٠٫٧٥×</option><option value="0.9">٠٫٩×</option><option selected="" value="1">١×</option><option value="1.1">١٫١×</option><option value="1.25">١٫٢٥×</option></select></label>
+<div class="stream-badge"><span></span> بث مباشر</div>
+</div>
+</section>
+<div aria-label="إجراءات الآية المحددة" class="ayah-selection-menu glass-panel" hidden="" id="ayah-selection-menu" role="menu">
+<button id="selection-copy" role="menuitem" type="button">نسخ الآية</button>
+<button id="selection-play" role="menuitem" type="button">تشغيل الآية</button>
+<button id="selection-tafsir" role="menuitem" type="button">فتح في التفسير</button></div>
+<audio id="audio" preload="none"></audio>
+<div class="search-overlay" hidden="" id="search-overlay">
+<div class="search-backdrop" data-close-search=""></div>
+<section aria-labelledby="search-title" aria-modal="true" class="search-dialog glass-panel" role="dialog">
+<div class="search-dialog-head">
+<div><span class="eyebrow">بحث في كتاب الله</span><h2 id="search-title">ابحث عن آية أو سورة</h2></div>
+<button aria-label="إغلاق البحث" class="icon-btn" id="search-close"><svg><use href="#i-close"></use></svg></button>
+</div>
+<label class="global-search-box"><svg><use href="#i-search"></use></svg><input autocomplete="off" id="global-search" placeholder="اكتب كلمة أو جزءًا من آية..." type="search"/></label>
+<div class="search-hint">البحث يعمل من نص القرآن المخزّن داخل الموقع. <kbd>/</kbd> للفتح السريع.</div>
+<div class="search-results" id="search-results"><div class="search-empty">ابدأ بكتابة كلمة للبحث.</div></div>
+</section>
+</div>
+<div class="modal-layer" hidden="" id="reciter-dialog">
+<div class="modal-scrim" data-close-reciter=""></div>
+<section aria-labelledby="reciter-dialog-title" aria-modal="true" class="modal-card reciter-dialog-card glass-panel" role="dialog">
+<header class="modal-head">
+<div><span class="eyebrow">قائمة القرّاء</span><h2 id="reciter-dialog-title">اختر تلاوتك</h2><p>اثنا عشر قارئًا برواية حفص عن عاصم، مع تزامن الكلمات للعشرة الأوائل.</p></div>
+<button aria-label="إغلاق قائمة القرّاء" class="icon-btn" id="reciter-dialog-close"><svg><use href="#i-close"></use></svg></button>
+</header>
+<div class="reciter-picker" id="reciter-grid"><div class="loading-line">يتم تجهيز القرّاء...</div></div>
+<p class="modal-note"><span class="live-dot"></span> التلاوات تُبث من مصادرها الأصلية عند الطلب، ولا تُخزَّن ملفات الصوت داخل الموقع.</p>
+</section>
+</div>
+<div class="modal-layer" hidden="" id="page-index-dialog">
+<div class="modal-scrim" data-close-page-index=""></div>
+<section aria-labelledby="page-index-title" aria-modal="true" class="modal-card page-index-card glass-panel" role="dialog">
+<header class="modal-head">
+<div><span class="eyebrow">فهرس المصحف</span><h2 id="page-index-title">٦٠٤ صفحات</h2><p>تنقّل بين صفحات مصحف المدينة كاملة، أو ابحث برقم الصفحة.</p></div>
+<button aria-label="إغلاق فهرس الصفحات" class="icon-btn" id="page-index-close"><svg><use href="#i-close"></use></svg></button>
+</header>
+<label class="search-field page-index-search"><svg><use href="#i-search"></use></svg><input aria-label="ابحث برقم الصفحة" autocomplete="off" id="page-index-search" inputmode="numeric" placeholder="ابحث برقم الصفحة..." type="search"/></label>
+<div class="page-index-grid" id="page-index-grid"></div>
+</section>
+</div>
+<button aria-label="إغلاق الفهرس" class="drawer-scrim" hidden="" id="library-scrim"></button>
+<div aria-live="polite" class="toast" id="toast" role="status"></div>
+<script defer="" src="assets/app.js"></script>
+<div class="modal-layer" hidden="" id="progress-share-dialog">
+<div class="modal-scrim" data-close-progress-share=""></div>
+<section aria-labelledby="progress-share-title" aria-modal="true" class="modal-card progress-share-card glass-panel" role="dialog">
+<header class="modal-head"><div><span class="eyebrow">بطاقة من رحلتك</span><h2 id="progress-share-title">شارك تقدّمك مع القرآن</h2></div><button aria-label="إغلاق" class="icon-btn" id="progress-share-close"><svg><use href="#i-close"></use></svg></button></header>
+<label class="dashboard-select-label">الاسم الذي سيظهر على البطاقة<input autocomplete="name" id="progress-share-name" maxlength="40" placeholder="اكتب اسمك" required="" type="text"/></label>
+<p class="dashboard-note">ستُنشأ صورة PNG على جهازك. لا يُرسل اسمك أو سجل قراءتك إلى أي خادم.</p>
+<div class="progress-share-actions"><button class="btn btn-ghost" id="progress-share-cancel">إلغاء</button><button class="btn btn-primary" id="progress-share-generate"><svg><use href="#i-download"></use></svg><span>إنشاء الصورة</span></button></div>
+</section>
+</div></body>
+</html>

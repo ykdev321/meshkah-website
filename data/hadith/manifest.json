@@ -1,0 +1,50 @@
+{
+  "source": "https://github.com/fawazahmed0/hadith-api",
+  "api_version": "1",
+  "format": "Arabic minified JSON editions; source files are not embedded in this ZIP because network DNS was unavailable during packaging.",
+  "download_command": "bash tools/download-hadith-collections.sh --all",
+  "collections": [
+    {
+      "id": "nawawi",
+      "edition": "ara-nawawi",
+      "local_file": "ara-nawawi.min.json",
+      "expected_minimum": 42
+    },
+    {
+      "id": "bukhari",
+      "edition": "ara-bukhari",
+      "local_file": "ara-bukhari.min.json",
+      "expected_minimum": 1000
+    },
+    {
+      "id": "muslim",
+      "edition": "ara-muslim",
+      "local_file": "ara-muslim.min.json",
+      "expected_minimum": 1000
+    },
+    {
+      "id": "abudawud",
+      "edition": "ara-abudawud",
+      "local_file": "ara-abudawud.min.json",
+      "expected_minimum": 1000
+    },
+    {
+      "id": "tirmidhi",
+      "edition": "ara-tirmidhi",
+      "local_file": "ara-tirmidhi.min.json",
+      "expected_minimum": 1000
+    },
+    {
+      "id": "nasai",
+      "edition": "ara-nasai",
+      "local_file": "ara-nasai.min.json",
+      "expected_minimum": 1000
+    },
+    {
+      "id": "ibnmajah",
+      "edition": "ara-ibnmajah",
+      "local_file": "ara-ibnmajah.min.json",
+      "expected_minimum": 1000
+    }
+  ]
+}

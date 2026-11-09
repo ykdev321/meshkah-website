@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1, viewport-fit=cover" name="viewport"/>
+<meta content="#08090a" name="theme-color"/>
+<meta content="8.1.0" name="application-version"/>
+<meta content="عن القرآن الكريم — مصحف إلكتروني يجمع القراءة والتلاوة المتزامنة مع الكلمات وفهرس الصفحات، من تطوير YKdev." name="description"/>
+<meta content="dark light" name="color-scheme"/>
+<title>عن الموقع | القرآن الكريم</title>
+<link href="icons/favicon.svg" rel="icon" type="image/svg+xml"/>
+<link href="manifest.webmanifest" rel="manifest"/>
+<link as="font" crossorigin="" href="assets/fonts/readex-pro-ar.woff2" rel="preload" type="font/woff2"/>
+<link href="assets/styles.css" rel="stylesheet"/>
+</head>
+<body class="about-page">
+<svg aria-hidden="true" class="svg-sprite" xmlns="http://www.w3.org/2000/svg">
+<symbol id="i-moon" viewbox="0 0 24 24"><path d="M20.5 15.4A8.8 8.8 0 0 1 8.6 3.5 8.9 8.9 0 1 0 20.5 15.4Z"></path></symbol>
+<symbol id="i-sun" viewbox="0 0 24 24"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></symbol>
+<symbol id="i-arrow" viewbox="0 0 24 24"><path d="M19 12H5m6-6-6 6 6 6"></path></symbol>
+<symbol id="i-book" viewbox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v17H6.5A2.5 2.5 0 0 0 4 22.5z"></path><path d="M4 5.5v17M8 7h8M8 11h8M8 15h5"></path></symbol>
+<symbol id="i-headphones" viewbox="0 0 24 24"><path d="M3 13v-1a9 9 0 0 1 18 0v1M3 13h4v7H5a2 2 0 0 1-2-2zM21 13h-4v7h2a2 2 0 0 0 2-2z"></path></symbol>
+<symbol id="i-shield" viewbox="0 0 24 24"><path d="M12 3 5 6v5c0 4.5 3 8.2 7 10 4-1.8 7-5.5 7-10V6z"></path><path d="m9 12 2.2 2.2L15.5 10"></path></symbol>
+<symbol id="i-spark" viewbox="0 0 24 24"><path d="M12 2.8c.6 5.1 3.1 7.6 8.2 8.2-5.1.6-7.6 3.1-8.2 8.2-.6-5.1-3.1-7.6-8.2-8.2 5.1-.6 7.6-3.1 8.2-8.2Z"></path></symbol>
+<symbol id="i-mail" viewbox="0 0 24 24"><rect height="14" rx="3" width="18" x="3" y="5"></rect><path d="m4 7 8 6 8-6"></path></symbol>
+</svg>
+<header class="topbar" id="topbar">
+<div class="topbar-inner">
+<a aria-label="العودة إلى المصحف" class="icon-btn mobile-menu" href="index.html">
+<svg class="mirror-icon"><use href="#i-arrow"></use></svg>
+</a>
+<a aria-label="القرآن الكريم — الصفحة الرئيسية" class="brand" href="index.html">
+<img alt="" class="brand-logo" height="46" src="icons/logo-mishkat.png" width="46"/>
+<span class="brand-copy"><strong>القرآن الكريم</strong><small>مصحف المدينة النبوية</small></span>
+</a>
+<nav aria-label="التنقل الرئيسي" class="main-nav">
+<a class="nav-link" href="index.html">المصحف</a>
+<a aria-current="page" class="nav-link nav-about active" href="about.html">عن الموقع</a>
+<a class="nav-link nav-about" href="privacy.html">سياسة الخصوصية</a></nav>
+<div class="topbar-actions">
+<a class="glass-action" href="index.html"><svg><use href="#i-book"></use></svg><span>العودة للمصحف</span></a>
+<button aria-label="تغيير المظهر" class="glass-icon" id="theme-toggle" title="تغيير المظهر"><svg><use href="#i-moon"></use></svg></button>
+</div>
+</div>
+</header>
+<main class="about-shell">
+<section aria-labelledby="about-title" class="about-hero">
+<img alt="" class="about-logo" height="92" src="icons/logo-mishkat.png" width="92"/>
+<span class="eyebrow"><span class="eyebrow-dot"></span> عن الموقع</span>
+<h1 id="about-title">القرآن الكريم</h1>
+<p>مساحة هادئة لقراءة القرآن الكريم والاستماع إليه. بُنِيت لتُبعد كل ما لا يخدم الخشوع: لا إعلانات، ولا حسابات، ولا ضجيج بصري — فقط صفحة مصحف، وتلاوة، وقلبٌ حاضر.</p>
+<div class="about-meta">
+<span>رواية <strong>حفص عن عاصم</strong></span>
+<span>مصحف المدينة · <strong>٦٠٤</strong> صفحات</span>
+<span>الإصدار <strong>٨.١</strong></span>
+</div>
+</section>
+<div class="about-grid">
+<section class="about-card glass-panel wide">
+<h2>عن المشروع</h2>
+<p>هذا مشروع مصحف إلكتروني عربي يعرض تخطيط صفحات مصحف المدينة بالرسم العثماني، مع تلاوات متزامنة مع الكلمات لعشرة قرّاء. صُمِّمَت الواجهة لتبقى في الخلفية: خط قرآني مريح، تباين محسوب، وحركة محدودة، كي يبقى التركيز على الآيات لا على التطبيق.</p>
+<p>يمكنك القراءة صفحةً صفحة، أو فتح وضع المصحف الكامل لتملأ الصفحة الشاشة، أو الانتقال مباشرة إلى أي صفحة من فهرس الأجزاء الثلاثين. وإذا أردت الاستماع، اضغط على أي كلمة في الآية لتنتقل التلاوة إليها عند توفر التوقيت.</p>
+</section>
+<section class="about-card glass-panel">
+<h2>ماذا تجد هنا؟</h2>
+<ul>
+<li>تخطيط صفحات مصحف المدينة في ٦٠٤ صفحات، مع الحفاظ على ترتيب الأسطر والكلمات قدر الإمكان.</li>
+<li>١٢ قارئًا برواية حفص عن عاصم، ويتوفر توقيت الكلمات لعشرة منهم.</li>
+<li>البحث في نص القرآن، والانتقال إلى الآية مباشرة.</li>
+<li>المحفوظات، ومتابعة آخر موضع قراءة، والتنقل بين الصفحات.</li>
+<li>وضع عرض كامل مع تكبير الصفحة، وفهرس الصفحات، وملء الشاشة.</li>
+<li>تحميل صورة الصفحة، وتحميل صوت السورة، وتكرار الصفحة.</li>
+<li>مظهر داكن وفاتح، وخطوط عربية محلية لا تعتمد على اتصال دائم.</li>
+</ul>
+</section>
+<section class="about-card glass-panel">
+<h2>كيف تستخدمه؟</h2>
+<ul>
+<li>ابدأ من زر <strong>متابعة القراءة</strong> ليعود بك إلى آخر موضع.</li>
+<li>افتح <strong>تصفح المصحف</strong> للوصول إلى أي صفحة عبر فهرس الأجزاء.</li>
+<li>اضغط على اسم القارئ لاختيار تلاوة جديدة من القائمة الزجاجية.</li>
+<li>استخدم زر التكبير لفتح صفحة المصحف كاملة، ثم تنقّل بالأسهم أو برقم الصفحة.</li>
+<li>على الجوال، افتح فهرس السور من زر القائمة أعلى الصفحة.</li>
+</ul>
+<div aria-label="أرقام سريعة" class="about-stats">
+<div class="about-stat"><strong>٦٠٤</strong><span>صفحة مصحف</span></div>
+<div class="about-stat"><strong>١١٤</strong><span>سورة</span></div>
+<div class="about-stat"><strong>١٢</strong><span>قارئًا</span></div>
+</div>
+</section>
+<section class="about-card glass-panel">
+<h2>الخصوصية</h2>
+<p>لا تحتاج إلى تسجيل أو حساب، ولا نستخدم أدوات تتبع أو إعلانات. تُحفَظ المحفوظات وآخر موضع قراءة والمظهر وحجم الخط داخل متصفحك فقط، ويمكن مسحها بحذف بيانات الموقع.</p>
+<p>ملفات الصوت تُبثّ من مصادرها الأصلية عند الطلب، ولا تُخزَّن داخل الموقع. الاتصال بالإنترنت مطلوب للاستماع ولتحميل تخطيط الصفحة التفصيلي أول مرة؛ أما نص القرآن وفهرس بدايات الصفحات فمضمّنان محليًا، ويُحفَظ تخطيط الصفحة في ذاكرة المتصفح بعد نجاح تحميله.</p>
+<p><a href="privacy.html">اقرأ سياسة الخصوصية كاملة.</a></p></section>
+<section class="about-card glass-panel">
+<h2>المصادر والاعتمادات</h2>
+<ul>
+<li>تخطيط صفحات المصحف: <a href="https://github.com/ouryhamdalaye/madinah-mushaf-json" rel="noopener" target="_blank">Madinah Mushaf JSON</a> · رخصة CC BY-SA 4.0.</li>
+<li>الصوت: تسجيلات منشورة عبر <a href="https://mp3quran.net/" rel="noopener" target="_blank">MP3Quran</a> و<a href="https://tarteel.app/" rel="noopener" target="_blank">Tarteel</a>، وتُبثّ من مصادرها.</li>
+<li>خط المصحف: Noto Naskh Arabic من مشروع Noto / Google، مناسب للنصوص العربية الطويلة، ومرخص برخصة SIL Open Font License 1.1. تُقدَّم نسخة الخط محليًا داخل الحزمة، مع استخدام نسخة النظام المثبتة عند توفرها. تبقى خطوط Amiri للعناوين وReadex Pro للواجهة.</li>
+</ul>
+<p>لم نُعد كتابة نص القرآن أو تغيير حروفه وتشكيله في هذا الإصلاح؛ التغيير طباعي في عائلة الخط وآلية تحميلها فقط. هذا الموقع خدمة تطوعية، وليس بديلًا عن المصحف المطبوع المعتمد ولا عن مراجعة أهل العلم. إن ظهر خطأ في النص أو التوقيت فنسعد بتبليغنا لتصحيحه.</p>
+</section>
+<section aria-labelledby="dev-title" class="about-card glass-panel wide dev-card">
+<span class="eyebrow"><span class="eyebrow-dot"></span> المطوّر</span>
+<h2 id="dev-title">صنع بعناية، ليخدم كتاب الله</h2>
+<p>صُمِّم الموقع وطُوِّر بواسطة <strong>YKdev</strong>. أسعد بالملاحظات والاقتراحات وتقارير الأخطاء، وأسأل الله أن ينفع بهذا العمل ويجعله خالصًا لوجهه الكريم.</p>
+<div class="dev-signature">
+<span aria-hidden="true" class="dev-avatar">ي</span>
+<div>
+<strong>YKdev</strong>
+<a href="mailto:ykdev321@gmail.com">ykdev321@gmail.com</a>
+</div>
+<a class="btn btn-ghost" href="mailto:ykdev321@gmail.com" style="margin-inline-start:auto">
+<svg><use href="#i-mail"></use></svg><span>تواصل معي</span>
+</a>
+</div>
+</section>
+</div>
+<footer class="site-footer about-footer glass-panel">
+<div class="footer-brand">
+<img alt="" height="34" src="icons/logo-mishkat.png" width="34"/>
+<div><strong>القرآن الكريم</strong><small>مصحف المدينة النبوية</small></div>
+</div>
+<p class="footer-dua">اللَّهُمَّ اجْعَلِ الْقُرْآنَ رَبِيعَ قُلُوبِنَا وَنُورَ صُدُورِنَا</p>
+<div class="footer-links">
+<a href="index.html">المصحف</a>
+<a href="mailto:ykdev321@gmail.com">تواصل معنا</a>
+</div>
+<div class="footer-about-bottom"><a aria-label="العودة إلى المصحف" href="index.html"><svg><use href="#i-book"></use></svg><span>العودة إلى المصحف</span></a></div>
+<div class="footer-credit"><span>صنع بواسطة</span><strong>YKdev</strong><i>•</i><a href="mailto:ykdev321@gmail.com">ykdev321@gmail.com</a></div>
+<div class="footer-sources">تخطيط صفحات المصحف: <a href="https://github.com/ouryhamdalaye/madinah-mushaf-json" rel="noopener" target="_blank">Madinah Mushaf JSON · CC BY-SA 4.0</a></div>
+</footer>
+</main>
+<div aria-live="polite" class="toast" id="toast" role="status"></div>
+<script defer="" src="assets/about.js"></script>
+</body>
+</html>
