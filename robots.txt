@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://quran-meshkah.pages.dev/sitemap.xml
