@@ -13,7 +13,8 @@
     heardAyahs: 'mishkat.heardAyahs.v1',
     lastListened: 'mishkat.lastListened.v1',
     readPages: 'mishkat.readPages.v1',
-    audioVolume: 'mishkat.audioVolume.v1'
+    audioVolume: 'mishkat.audioVolume.v1',
+    lastView: 'mishkat.lastView.v1'
   };
 
   const audio = $('#audio');
@@ -337,9 +338,11 @@
       if (document.body.classList.contains('player-standalone')) writeStorage('mishkat.playerLaunchTarget.v1', null);
       const launchSurah = Number(launchTarget?.s || 0);
       const launchAyah = Number(launchTarget?.a || 0);
-      const startSurahCandidate = getSurah(launchSurah) ? launchSurah : (getSurah(confirmedPosition?.s) ? Number(confirmedPosition.s) : 1);
+      const lastView = readStorage(STORAGE.lastView, null);
+      const resumeView = getVerse(lastView?.s, lastView?.a) ? lastView : confirmedPosition;
+      const startSurahCandidate = getSurah(launchSurah) ? launchSurah : (getSurah(resumeView?.s) ? Number(resumeView.s) : 1);
       const startingSurah = startSurahCandidate;
-      const startingAyahCandidate = getVerse(startingSurah, launchAyah) ? launchAyah : (getVerse(startingSurah, confirmedPosition?.a) ? Number(confirmedPosition.a) : 1);
+      const startingAyahCandidate = getVerse(startingSurah, launchAyah) ? launchAyah : (getVerse(startingSurah, resumeView?.a) ? Number(resumeView.a) : 1);
       await openSurah(startingSurah, startingAyahCandidate, false);
       initializeDashboardControls();
       updatePlayerLabels();
@@ -776,7 +779,13 @@
     state.currentPageLayout = pageData;
   }
 
+  function saveLastView() {
+    if (!state.quran.length || !getVerse(state.activeSurah, state.activeAyah)) return;
+    writeStorage(STORAGE.lastView, { s: state.activeSurah, a: state.activeAyah, p: state.pageIndex, at: Date.now() });
+  }
+
   async function renderReader() {
+    saveLastView();
     const surah = getSurah(state.activeSurah);
     if (!surah) return;
     const renderToken = ++state.pageRenderToken;
