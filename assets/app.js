@@ -345,6 +345,7 @@
       const startingAyahCandidate = getVerse(startingSurah, launchAyah) ? launchAyah : (getVerse(startingSurah, resumeView?.a) ? Number(resumeView.a) : 1);
       await openSurah(startingSurah, startingAyahCandidate, false);
       initializeDashboardControls();
+      if (getVerse(lastView?.s, lastView?.a) && !document.body.classList.contains('player-standalone') && !launchTarget) setNavState('reader');
       updatePlayerLabels();
       updatePlayButton();
       if (document.body.classList.contains('player-standalone')) showDashboardView('player');
@@ -779,8 +780,10 @@
     state.currentPageLayout = pageData;
   }
 
+  let viewTrackingReady = false;
+  ['pointerdown', 'keydown', 'touchstart'].forEach(type => window.addEventListener(type, () => { viewTrackingReady = true; }, { once: true, passive: true }));
   function saveLastView() {
-    if (!state.quran.length || !getVerse(state.activeSurah, state.activeAyah)) return;
+    if (!viewTrackingReady || !state.quran.length || !getVerse(state.activeSurah, state.activeAyah)) return;
     writeStorage(STORAGE.lastView, { s: state.activeSurah, a: state.activeAyah, p: state.pageIndex, at: Date.now() });
   }
 
@@ -2163,7 +2166,7 @@
   $$('.dashboard-tab').forEach(button => button.addEventListener('click', () => showDashboardView(button.dataset.dashboardView)));
   $$('[data-open-reader]').forEach(button => button.addEventListener('click', () => setNavState('reader')));
   $('#confirm-page-read').addEventListener('click', markCurrentPageRead);
-  $('#dashboard-continue').addEventListener('click', async () => { const saved=state.lastConfirmedRead||{s:1,a:1}; await openSurah(saved.s,saved.a,true); setNavState('reader'); });
+  $('#dashboard-continue').addEventListener('click', async () => { const lv=readStorage(STORAGE.lastView,null); const saved=getVerse(lv?.s,lv?.a)?lv:(state.lastConfirmedRead||{s:1,a:1}); await openSurah(saved.s,saved.a,true); setNavState('reader'); });
   $('#hero-browse').addEventListener('click', () => { setNavState('reader'); });
   $('#daily-ayah-play').addEventListener('click', () => playDailyVerse());
   $('#daily-ayah-open').addEventListener('click', openDailyVerseInReader);
