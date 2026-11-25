@@ -1,11 +1,11 @@
-// Mishkat v8.1 — restored v8 visual shell with a separate audio player page.
-const CACHE_NAME = 'mishkat-app-v8-restored-player';
+// Mishkat v8.3 — keeps every downloaded hadith edition side by side and falls back to the app shell for the bundled one.
+const CACHE_NAME = 'mishkat-app-v8-3-hadith-tafsir';
 const TAFSIR_CACHE = 'mishkat-tafsir-v1';
 const HADITH_CACHE = 'mishkat-hadith-local-v2';
 const APP_FILES = [
-  './','./index.html','./player.html','./about.html','./privacy.html','./assets/styles.css','./assets/app.js','./assets/about.js',
+  './','./index.html','./player.html','./about.html','./privacy.html','./hadith.html','./tafsir.html','./assets/styles.css','./assets/app.js','./assets/about.js','./assets/hadith.js','./assets/tafsir.js',
   './assets/fonts/readex-pro-ar.woff2','./assets/fonts/readex-pro-latin.woff2','./assets/fonts/amiri-400-ar.woff2','./assets/fonts/amiri-700-ar.woff2','./assets/fonts/noto-naskh-arabic-ar.woff2',
-  './manifest.webmanifest','./icons/favicon.svg','./icons/logo-mishkat.png','./data/quran.json','./data/reciters.json','./data/verse-to-page.json','./data/tafsir/index.json'
+  './manifest.webmanifest','./icons/favicon.svg','./icons/logo-mishkat.png','./data/quran.json','./data/reciters.json','./data/verse-to-page.json','./data/tafsir/index.json','./data/hadith/ara-nawawi.min.json'
 ];
 self.addEventListener('install', event => {
   event.waitUntil((async()=>{
@@ -53,10 +53,16 @@ self.addEventListener('fetch', event => {
       try{
         const response=await fetch(request);
         if(response.ok){
-          try{const candidate=await response.clone().json();if(Array.isArray(candidate.hadiths)&&candidate.hadiths.length>0&&candidate.hadiths.some(item=>typeof item?.text==='string'&&item.text.trim())){const keys=await cache.keys();for(const key of keys)await cache.delete(key);await cache.put(request,response.clone())}}catch(_){}
+          // Keep every downloaded edition side by side; deleting the other keys
+          // here is what silently wiped the previously saved books offline.
+          try{const candidate=await response.clone().json();if(Array.isArray(candidate.hadiths)&&candidate.hadiths.length>0&&candidate.hadiths.some(item=>typeof item?.text==='string'&&item.text.trim()))await cache.put(request,response.clone())}catch(_){}
         }
         return response
-      }catch(error){throw error}
+      }catch(error){
+        // The bundled edition is also precached in the application shell,
+        // so it stays readable offline even before this bucket holds a copy.
+        try{const shell=await caches.open(CACHE_NAME);const shellCached=await shell.match(request);if(shellCached)return shellCached}catch(_){}
+        throw error}
     })());
     return;
   }

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1, viewport-fit=cover" name="viewport"/>
+<meta content="#08090a" name="theme-color"/>
+<meta content="8.3.0" name="application-version"/>
+<meta content="مكتبة الأحاديث في مشكاة — متون من مجموعات حديثية معروفة مع بحث واسم الكتاب ورقم الحديث." name="description"/>
+<meta content="dark light" name="color-scheme"/>
+<title>الأحاديث | مشكاة</title>
+<link href="icons/logo-mishkat.png" rel="icon" type="image/png"/>
+<link href="manifest.webmanifest" rel="manifest"/>
+<link as="font" crossorigin="" href="assets/fonts/readex-pro-ar.woff2" rel="preload" type="font/woff2"/>
+<link as="font" crossorigin="" href="assets/fonts/noto-naskh-arabic-ar.woff2" rel="preload" type="font/woff2"/>
+<link href="assets/styles.css" rel="stylesheet"/>
+</head>
+<body class="hadith-page">
+<svg aria-hidden="true" class="svg-sprite" xmlns="http://www.w3.org/2000/svg">
+<symbol id="i-book" viewbox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v17H6.5A2.5 2.5 0 0 0 4 22.5z"></path><path d="M4 5.5v17M8 7h8M8 11h8M8 15h5"></path></symbol>
+<symbol id="i-search" viewbox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.8"></circle><path d="m16 16 5 5"></path></symbol>
+<symbol id="i-moon" viewbox="0 0 24 24"><path d="M20.5 15.4A8.8 8.8 0 0 1 8.6 3.5 8.9 8.9 0 1 0 20.5 15.4Z"></path></symbol>
+<symbol id="i-sun" viewbox="0 0 24 24"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></symbol>
+<symbol id="i-arrow" viewbox="0 0 24 24"><path d="M19 12H5m6-6-6 6 6 6"></path></symbol>
+<symbol id="i-list" viewbox="0 0 24 24"><path d="M8 5h13M8 12h13M8 19h13M3.5 5h.1M3.5 12h.1M3.5 19h.1"></path></symbol>
+<symbol id="i-copy" viewbox="0 0 24 24"><rect height="12" rx="2" width="12" x="9" y="9"></rect><path d="M5 15V5a2 2 0 0 1 2-2h10"></path></symbol>
+<symbol id="i-spark" viewbox="0 0 24 24"><path d="M12 2.8c.6 5.1 3.1 7.6 8.2 8.2-5.1.6-7.6 3.1-8.2 8.2-.6-5.1-3.1-7.6-8.2-8.2 5.1-.6 7.6-3.1 8.2-8.2Z"></path></symbol>
+<symbol id="i-info" viewbox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M12 10.5V17M12 7.2v.2"></path></symbol>
+<symbol id="i-mail" viewbox="0 0 24 24"><rect height="14" rx="3" width="18" x="3" y="5"></rect><path d="m4 7 8 6 8-6"></path></symbol>
+</svg>
+<header class="topbar" id="topbar">
+<div class="topbar-inner">
+<a aria-label="العودة إلى الرئيسية" class="icon-btn mobile-menu" href="index.html">
+<svg class="mirror-icon"><use href="#i-arrow"></use></svg>
+</a>
+<a aria-label="القرآن الكريم — الصفحة الرئيسية" class="brand" href="index.html">
+<img alt="" class="brand-logo" height="46" src="icons/logo-mishkat.png" width="46"/>
+<span class="brand-copy"><strong>مشكاة</strong><small>رفيقك مع القرآن الكريم</small></span>
+</a>
+<nav aria-label="التنقل الرئيسي" class="main-nav">
+<a class="nav-link" href="index.html">الرئيسية</a>
+<a class="nav-link" href="index.html">المصحف</a>
+<a class="nav-link" href="player.html">التلاوة</a>
+<a class="nav-link" href="tafsir.html">المصحف والتفسير</a>
+<a aria-current="page" class="nav-link active" href="hadith.html">الأحاديث</a>
+<a class="nav-link nav-about" href="about.html">عن الموقع</a>
+</nav>
+<div class="topbar-actions">
+<a class="glass-action" href="index.html"><svg><use href="#i-book"></use></svg><span>العودة للمصحف</span></a>
+<button aria-label="تغيير المظهر" class="glass-icon" id="theme-toggle" title="تغيير المظهر"><svg><use href="#i-moon"></use></svg></button>
+</div>
+</div>
+</header>
+<main class="page-shell hadith-shell">
+<section aria-labelledby="hadith-page-title" class="about-hero hadith-hero">
+<img alt="" class="about-logo" height="92" src="icons/logo-mishkat.png" width="92"/>
+<span class="eyebrow"><span class="eyebrow-dot"></span> من جوامع الكلم</span>
+<h1 id="hadith-page-title">مكتبة <span>الأحاديث</span></h1>
+<p>متون من مجموعات حديثية معروفة، مع بحث في النص وإظهار اسم الكتاب ورقم الحديث ومرجعه.</p>
+<div class="about-meta">
+<span><strong>٧</strong> مجموعات حديثية</span>
+<span>الأربعون النووية <strong>تعمل دون اتصال</strong></span>
+<span>بقية الكتب <strong>عند الطلب</strong></span>
+</div>
+</section>
+<section class="glass-panel hadith-panel">
+<div class="hadith-heading"><span class="eyebrow">متون الكتب</span><h3 id="hadith-heading-title">مكتبة الأحاديث</h3><p>اختر الكتاب، ثم تصفح قائمة الأحاديث أو ابحث فيها.</p></div>
+<div class="hadith-controls">
+<label class="dashboard-select-label hadith-collection-label">مصدر الأحاديث<select id="hadith-collection"><option value="nawawi">الأربعون النووية</option><option value="bukhari">صحيح البخاري</option><option value="muslim">صحيح مسلم</option><option value="abudawud">سنن أبي داود</option><option value="tirmidhi">جامع الترمذي</option><option value="nasai">سنن النسائي</option><option value="ibnmajah">سنن ابن ماجه</option></select></label>
+<label class="dashboard-select-label hadith-search-label">ابحث في الأحاديث<input id="hadith-search" placeholder="ابحث بكلمة من الحديث…" type="search"/></label>
+</div>
+<div class="hadith-layout"><div class="hadith-list" id="hadith-list"><p class="dashboard-note">يتم تجهيز الأحاديث…</p></div><article class="hadith-reading-card" id="hadith-reading-card"><span class="eyebrow">الحديث المختار</span><h3 id="hadith-title">الأربعون النووية</h3><p id="hadith-text">اختر حديثاً من القائمة لعرض متنه.</p><small id="hadith-reference"></small><div class="hadith-actions"><button class="btn btn-ghost" id="hadith-copy"><svg><use href="#i-copy"></use></svg><span>نسخ الحديث</span></button></div></article></div>
+<p class="dashboard-note">المتون من نسخ عربية منشورة في مشروع Hadith API. بعض كتب السنن تضم الصحيح والحسن والضعيف؛ اسم الكتاب ليس حكماً على درجة كل حديث. اعرض درجة الحديث فقط عندما تكون مرفقة بمرجع موثوق.</p>
+</section>
+<footer class="site-footer glass-panel">
+<div class="footer-brand">
+<img alt="" height="34" src="icons/logo-mishkat.png" width="34"/>
+<div><strong>مشكاة</strong><small>رفيقك مع القرآن الكريم</small></div>
+</div>
+<p class="footer-dua">اللَّهُمَّ اجْعَلِ الْقُرْآنَ رَبِيعَ قُلُوبِنَا وَنُورَ صُدُورِنَا</p>
+<div class="footer-links">
+<a href="mailto:ykdev321@gmail.com">تواصل معنا</a>
+</div>
+<div class="footer-credit"><span>صنع بواسطة</span><strong>YKdev</strong><i>•</i><a href="mailto:ykdev321@gmail.com">ykdev321@gmail.com</a></div>
+<nav aria-label="روابط الموقع" class="footer-links"><a href="about.html">عن مشكاة</a><a href="privacy.html">سياسة الخصوصية</a></nav></footer>
+</main>
+<div aria-live="polite" class="toast" id="toast" role="status"></div>
+<script defer="" src="assets/hadith.js"></script>
+</body>
+</html>

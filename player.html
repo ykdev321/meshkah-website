@@ -5,7 +5,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1, viewport-fit=cover" name="viewport"/>
 <meta content="#08090a" name="theme-color"/>
-<meta content="8.1.0" name="application-version"/>
+<meta content="8.3.0" name="application-version"/>
 <meta content="مشغل مشكاة لتلاوة القرآن الكريم، مع اختيار السورة والقارئ والتحكم في الصوت والتقدم." name="description"/>
 <meta content="dark light" name="color-scheme"/>
 <title>مشغل مشكاة | القرآن الكريم</title>
@@ -54,9 +54,11 @@
 <span class="brand-copy"><strong>مشكاة</strong><small>رفيقك مع القرآن الكريم</small></span>
 </a>
 <nav aria-label="التنقل الرئيسي" class="main-nav">
-<button class="nav-link active" data-nav="home">الرئيسية</button>
+<button class="nav-link" data-nav="home">الرئيسية</button>
 <button class="nav-link" data-nav="reader">المصحف</button>
 <a aria-current="page" aria-label="فتح مشغل السور" class="nav-link active" data-nav="listen" href="player.html">التلاوة</a>
+<a class="nav-link" href="tafsir.html">المصحف والتفسير</a>
+<a class="nav-link" href="hadith.html">الأحاديث</a>
 <button class="nav-link" data-nav="saved">المحفوظات</button>
 <a class="nav-link nav-about" href="about.html">عن الموقع</a>
 </nav>
@@ -96,7 +98,7 @@
 <button aria-pressed="false" class="dashboard-tab" data-dashboard-view="tafsir">التفسير</button>
 <button aria-pressed="false" class="dashboard-tab" data-dashboard-view="hadith">الأحاديث</button>
 </nav>
-<section aria-label="تقدمي" class="dashboard-view active" data-view-panel="progress" hidden="True">
+<section aria-label="تقدمي" class="dashboard-view active" data-view-panel="progress" hidden="true">
 <div class="progress-hero-card">
 <div><span class="eyebrow">رحلتك في المصحف</span><strong id="progress-percentage">٠٪</strong><small id="progress-position">الصفحة ١ من ٦٠٤</small></div>
 <div aria-label="نسبة التقدم" class="progress-ring" id="progress-ring" role="img"><span id="progress-ring-value">٠٪</span></div>
@@ -113,7 +115,7 @@
 </div>
 <div class="progress-page-actions"><p class="dashboard-note">يُحتسب التقدم من الصفحات التي تؤكد قراءتها بنفسك، وليس من مجرد التنقل بينها.</p><button class="btn btn-ghost" id="share-progress-open"><svg><use href="#i-share"></use></svg><span>مشاركة تقدّمي</span></button></div>
 </section>
-<section aria-label="بيانات السور" class="dashboard-view" data-view-panel="surah" hidden="True">
+<section aria-label="بيانات السور" class="dashboard-view" data-view-panel="surah" hidden="true">
 <div class="surah-information-head"><div><span class="eyebrow">معلومات السورة</span><h3 id="surah-info-name">الفاتحة</h3><p id="surah-info-subtitle">السورة رقم ١</p></div><label class="dashboard-select-label">اختر السورة<select aria-label="اختر سورة لعرض بياناتها" id="dashboard-surah-select"></select></label></div>
 <div class="surah-info-grid" id="surah-info-grid"></div>
 <p class="dashboard-note">نعرض البيانات الثابتة الموجودة في مصدر المصحف. لم نضف سنة نزول هجرية لأن ملفات المشروع لا تتضمن تاريخاً موثقاً موحداً لكل سورة.</p>
@@ -144,19 +146,21 @@
 </aside>
 </div>
 </section>
-<section aria-label="تفسير الآيات" class="dashboard-view" data-view-panel="tafsir" hidden="True">
+<section aria-label="تفسير الآيات" class="dashboard-view" data-view-panel="tafsir" hidden="true">
 <div class="surah-information-head"><div><span class="eyebrow">معاني الآيات</span><h3>تفسير القرآن الكريم</h3><p>خمسة مصادر من ملفات التفسير المرفقة</p></div></div>
 <div class="tafsir-filters"><label class="dashboard-select-label">السورة<select id="tafsir-surah-select"></select></label><label class="dashboard-select-label">رقم الآية<input aria-label="أدخل رقم الآية" id="tafsir-ayah-number" inputmode="numeric" min="1" step="1" type="number" value="1"/></label><label class="dashboard-select-label">المفسّر<select id="tafsir-source-select"><option>التفسير الميسر</option><option>تفسير ابن كثير</option><option>تفسير السعدي</option><option>تفسير القرطبي</option><option>تفسير الطبري</option></select></label></div>
 <div class="tafsir-verse-box"><span class="eyebrow">الآية الكريمة</span><p id="tafsir-verse-text"></p></div>
 <article class="tafsir-text-card"><header><span class="eyebrow" id="tafsir-source-label">التفسير الميسر</span><button aria-label="استمع إلى الآية" class="icon-btn" id="tafsir-read-ayah" title="استمع إلى الآية">▷</button></header><p id="tafsir-text">اختر سورة وآية لعرض التفسير.</p></article>
 <p class="dashboard-note">الملفات مرفقة بالمشروع وتُحمّل سورة واحدة عند الطلب. هذه مجموعة بيانات مجمّعة؛ يُستحسن مراجعة النصوص مقابل طبعات موثوقة من كتب التفسير قبل الاعتماد البحثي.</p>
+<a class="btn btn-ghost dashboard-page-link" href="tafsir.html"><svg><use href="#i-book"></use></svg><span>افتح المصحف مع التفسير جنباً إلى جنب</span></a>
 </section>
-<section aria-label="الأربعون النووية" class="dashboard-view" data-view-panel="hadith" hidden="True">
+<section aria-label="الأربعون النووية" class="dashboard-view" data-view-panel="hadith" hidden="true">
 <div class="hadith-heading"><span class="eyebrow">من جوامع الكلم</span><h3 id="hadith-heading-title">مكتبة الأحاديث</h3><p>متون من مجموعات حديثية معروفة، مع إظهار اسم الكتاب ورقم الحديث.</p></div>
 <label class="dashboard-select-label hadith-collection-label">مصدر الأحاديث<select id="hadith-collection"><option value="nawawi">الأربعون النووية</option><option value="bukhari">صحيح البخاري</option><option value="muslim">صحيح مسلم</option><option value="abudawud">سنن أبي داود</option><option value="tirmidhi">جامع الترمذي</option><option value="nasai">سنن النسائي</option><option value="ibnmajah">سنن ابن ماجه</option></select></label>
 <label class="dashboard-select-label hadith-search-label">ابحث في الأحاديث<input id="hadith-search" placeholder="ابحث بكلمة من الحديث…" type="search"/></label>
 <div class="hadith-layout"><div class="hadith-list" id="hadith-list"><p class="dashboard-note">سيتم تجهيز الأحاديث محلياً عند فتح هذا القسم أول مرة.</p></div><article class="hadith-reading-card" id="hadith-reading-card"><span class="eyebrow">الحديث المختار</span><h3 id="hadith-title">الأربعون النووية</h3><p id="hadith-text">اختر كتاباً من القائمة لعرض متونه. تُحمّل المجموعة عند الطلب وتُحفظ محلياً بعد نجاح التنزيل.</p><small id="hadith-reference"></small></article></div>
 <p class="dashboard-note">المتون من نسخ عربية منشورة في مشروع Hadith API. بعض كتب السنن تضم الصحيح والحسن والضعيف؛ اسم الكتاب ليس حكماً على درجة كل حديث. اعرض درجة الحديث فقط عندما تكون مرفقة بمرجع موثوق.</p>
+<a class="btn btn-ghost dashboard-page-link" href="hadith.html"><svg><use href="#i-list"></use></svg><span>افتح صفحة الأحاديث الكاملة</span></a>
 </section>
 </div>
 </section>
@@ -229,7 +233,6 @@
 <div aria-label="أدوات صفحة المصحف" class="page-actions glass-panel">
 <button class="page-tool" id="previous-page" title="الصفحة السابقة"><svg class="mirror-icon"><use href="#i-next"></use></svg><span>السابقة</span></button>
 <button aria-pressed="false" class="page-tool repeat-page" id="repeat-page" title="تكرار الصفحة"><svg><use href="#i-repeat"></use></svg><span>تكرار الصفحة</span></button>
-<button class="page-tool" id="download-page-image" title="تحميل صورة الصفحة"><svg><use href="#i-download"></use></svg><span>تحميل صورة</span></button>
 <button class="page-tool" id="open-in-surah-player" title="فتح السورة الحالية في المشغل"><svg><use href="#i-headphones"></use></svg><span>الفتح في مشغل السور</span></button>
 <button class="page-tool download-audio" id="download-surah-audio" title="تحميل ملف MP3 للسورة الحالية"><svg><use href="#i-download"></use></svg><span>تحميل السورة</span></button>
 <button class="page-tool" id="focus-page-btn" title="الشاشة كاملة — تكبير صفحة المصحف"><svg><use href="#i-expand"></use></svg><span>الشاشة كاملة</span></button>

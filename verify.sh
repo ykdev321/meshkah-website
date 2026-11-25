@@ -4,6 +4,8 @@ cd "$(dirname "$0")"
 
 node --check assets/app.js
 node --check assets/about.js
+node --check assets/hadith.js
+node --check assets/tafsir.js
 node --check service-worker.js
 bash -n tools/download-hadith-collections.sh
 bash -n tools/download-nawawi40.sh
@@ -56,7 +58,7 @@ class Parser(HTMLParser):
             if attrs.get(key): self.refs.append(attrs[key])
 
 pages = {}
-for name in ('index.html','player.html','about.html','privacy.html'):
+for name in ('index.html','player.html','about.html','privacy.html','hadith.html','tafsir.html'):
     parser = Parser(); parser.feed((root/name).read_text(encoding='utf-8'))
     assert len(parser.ids) == len(set(parser.ids)), f'duplicate IDs in {name}'
     for ref in parser.refs:
@@ -69,8 +71,11 @@ assert 'home-dashboard' in pages['index.html'] and 'daily-verse-text' in pages['
 assert 'player' in (root/'index.html').read_text(encoding='utf-8')
 assert 'player-standalone' in (root/'player.html').read_text(encoding='utf-8')
 assert 'studio-reciter-list' in pages['player.html'] and 'studio-surah-list' in pages['player.html']
+assert 'hadith-collection' in pages['hadith.html'] and 'hadith-list' in pages['hadith.html']
+assert 'tafsir-entries' in pages['tafsir.html'] and 'quran-content' in pages['tafsir.html']
+assert 'hadith.html' in (root/'index.html').read_text(encoding='utf-8') and 'tafsir.html' in (root/'index.html').read_text(encoding='utf-8')
 assert 'privacy.html' in (root/'service-worker.js').read_text(encoding='utf-8')
-assert 'mishkat-app-v8-restored-player' in (root/'service-worker.js').read_text(encoding='utf-8')
+assert 'mishkat-app-v8-2-hadith-tafsir' in (root/'service-worker.js').read_text(encoding='utf-8')
 
 app = (root/'assets/app.js').read_text(encoding='utf-8')
 used = set(re.findall(r"\$\(['\"]#([\w-]+)['\"]\)", app))
@@ -88,7 +93,11 @@ assert 'mishkat.playerLaunchTarget.v1' in app and "location.href = 'player.html'
 assert 'markCurrentPageRead' in app and 'selection.isCollapsed' in app
 assert 'range.intersectsNode(unit)' in app
 assert 'downloadPageImage' in app and 'renderSelectedTafsir' in app
-print(f'PASS HTML/navigation: four pages / unique IDs / local resources / all application selectors resolved in the appropriate page')
+for script_name, page_name in (('assets/hadith.js','hadith.html'), ('assets/tafsir.js','tafsir.html')):
+    used_ids = set(re.findall(r"\$\(['\"]#([\w-]+)['\"]\)", (root/script_name).read_text(encoding='utf-8')))
+    missing = used_ids - pages[page_name]
+    assert not missing, f'missing {page_name} IDs referenced by {script_name}: {sorted(missing)}'
+print(f'PASS HTML/navigation: six pages / unique IDs / local resources / all application selectors resolved in the appropriate page')
 
 # Tafsir data: preserve the five selected local sources.
 expected = {'التفسير الميسر','تفسير ابن كثير','تفسير السعدي','تفسير القرطبي','تفسير الطبري'}
@@ -121,6 +130,8 @@ print(f'PASS Hadith metadata: seven source editions; {present} non-empty local e
 # Service worker and stylesheet integrity.
 sw = (root/'service-worker.js').read_text(encoding='utf-8')
 assert "'./player.html'" in sw and "'./privacy.html'" in sw
+assert "'./hadith.html'" in sw and "'./tafsir.html'" in sw and "'./assets/hadith.js'" in sw and "'./assets/tafsir.js'" in sw
+assert "'./data/hadith/ara-nawawi.min.json'" in sw
 assert 'data/pages/' in sw and 'TAFSIR_CACHE' in sw and 'HADITH_CACHE' in sw
 css = (root/'assets/styles.css').read_text(encoding='utf-8')
 assert '.home-dashboard{display:grid;grid-template-columns:minmax(270px,.82fr) minmax(0,1.55fr)' in css

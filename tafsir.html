@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1, viewport-fit=cover" name="viewport"/>
+<meta content="#08090a" name="theme-color"/>
+<meta content="8.3.0" name="application-version"/>
+<meta content="المصحف مع التفسير جنباً إلى جنب في مشكاة — اختر الآية من صفحة المصحف واقرأ تفسيرها، وتنقّل بين التفاسير بالتمرير." name="description"/>
+<meta content="dark light" name="color-scheme"/>
+<title>المصحف والتفسير | مشكاة</title>
+<link href="icons/logo-mishkat.png" rel="icon" type="image/png"/>
+<link href="manifest.webmanifest" rel="manifest"/>
+<link as="font" crossorigin="" href="assets/fonts/readex-pro-ar.woff2" rel="preload" type="font/woff2"/>
+<link as="font" crossorigin="" href="assets/fonts/noto-naskh-arabic-ar.woff2" rel="preload" type="font/woff2"/>
+<link href="assets/styles.css" rel="stylesheet"/>
+</head>
+<body class="tafsir-page">
+<svg aria-hidden="true" class="svg-sprite" xmlns="http://www.w3.org/2000/svg">
+<symbol id="i-book" viewbox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v17H6.5A2.5 2.5 0 0 0 4 22.5z"></path><path d="M4 5.5v17M8 7h8M8 11h8M8 15h5"></path></symbol>
+<symbol id="i-search" viewbox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.8"></circle><path d="m16 16 5 5"></path></symbol>
+<symbol id="i-moon" viewbox="0 0 24 24"><path d="M20.5 15.4A8.8 8.8 0 0 1 8.6 3.5 8.9 8.9 0 1 0 20.5 15.4Z"></path></symbol>
+<symbol id="i-sun" viewbox="0 0 24 24"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></symbol>
+<symbol id="i-arrow" viewbox="0 0 24 24"><path d="M19 12H5m6-6-6 6 6 6"></path></symbol>
+<symbol id="i-prev" viewbox="0 0 24 24"><path d="M6 5v14M19 5 8 12l11 7z"></path></symbol>
+<symbol id="i-next" viewbox="0 0 24 24"><path d="M18 5v14M5 5l11 7-11 7z"></path></symbol>
+<symbol id="i-spark" viewbox="0 0 24 24"><path d="M12 2.8c.6 5.1 3.1 7.6 8.2 8.2-5.1.6-7.6 3.1-8.2 8.2-.6-5.1-3.1-7.6-8.2-8.2 5.1-.6 7.6-3.1 8.2-8.2Z"></path></symbol>
+<symbol id="i-info" viewbox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M12 10.5V17M12 7.2v.2"></path></symbol>
+<symbol id="i-mail" viewbox="0 0 24 24"><rect height="14" rx="3" width="18" x="3" y="5"></rect><path d="m4 7 8 6 8-6"></path></symbol>
+</svg>
+<header class="topbar" id="topbar">
+<div class="topbar-inner">
+<a aria-label="العودة إلى الرئيسية" class="icon-btn mobile-menu" href="index.html">
+<svg class="mirror-icon"><use href="#i-arrow"></use></svg>
+</a>
+<a aria-label="القرآن الكريم — الصفحة الرئيسية" class="brand" href="index.html">
+<img alt="" class="brand-logo" height="46" src="icons/logo-mishkat.png" width="46"/>
+<span class="brand-copy"><strong>مشكاة</strong><small>رفيقك مع القرآن الكريم</small></span>
+</a>
+<nav aria-label="التنقل الرئيسي" class="main-nav">
+<a class="nav-link" href="index.html">الرئيسية</a>
+<a class="nav-link" href="index.html">المصحف</a>
+<a class="nav-link" href="player.html">التلاوة</a>
+<a aria-current="page" class="nav-link active" href="tafsir.html">المصحف والتفسير</a>
+<a class="nav-link" href="hadith.html">الأحاديث</a>
+<a class="nav-link nav-about" href="about.html">عن الموقع</a>
+</nav>
+<div class="topbar-actions">
+<a class="glass-action" href="index.html"><svg><use href="#i-book"></use></svg><span>العودة للمصحف</span></a>
+<button aria-label="تغيير المظهر" class="glass-icon" id="theme-toggle" title="تغيير المظهر"><svg><use href="#i-moon"></use></svg></button>
+</div>
+</div>
+</header>
+<main class="page-shell tafsir-shell">
+<section aria-label="أدوات صفحة التفسير" class="tafsir-tools glass-panel">
+<div class="tafsir-tools-title">
+<span class="eyebrow"><span class="eyebrow-dot"></span> المصحف والتفسير</span>
+<strong>اختر آية من صفحة المصحف لقراءة تفسيرها، ومرّر في عمود التفسير للانتقال إلى تفسير الآية التي تليها.</strong>
+</div>
+<div class="tafsir-tools-controls">
+<label class="dashboard-select-label">السورة<select aria-label="الانتقال إلى سورة" id="tafsir-surah-jump"></select></label>
+<label class="dashboard-select-label">المفسّر<select aria-label="مصدر التفسير" id="tafsir-source-select"><option>التفسير الميسر</option><option>تفسير ابن كثير</option><option>تفسير السعدي</option><option>تفسير القرطبي</option><option>تفسير الطبري</option></select></label>
+<div aria-label="حجم الخط" class="tool-group">
+<button aria-label="تصغير الخط" class="setting-button" id="font-smaller">A−</button>
+<button aria-label="تكبير الخط" class="setting-button" id="font-larger">A+</button>
+<button aria-label="استعادة حجم الخط المريح" class="setting-button font-reset" id="font-reset" title="استعادة حجم الخط المريح">↺</button>
+</div>
+<div class="page-jump">
+<label for="page-number-input">صفحة</label>
+<input aria-label="رقم الصفحة" id="page-number-input" inputmode="numeric" max="604" min="1" type="number" value="1"/>
+<span id="page-total">/ ٦٠٤</span>
+</div>
+</div>
+</section>
+<div class="tafsir-layout">
+<div class="tafsir-mushaf-column">
+<div class="mushaf-stage" id="mushaf-stage">
+<div aria-label="صفحة المصحف" class="mushaf-page" id="mushaf-page">
+<div class="mushaf-topline"><span>﷽</span><span class="mushaf-ornament">۞</span></div>
+<div class="quran-content" dir="rtl" id="quran-content" lang="ar"><div class="loading-state">تُفتَح صفحات المصحف...</div></div>
+<div class="mushaf-page-footer"><span class="mushaf-page-number" id="mushaf-page-number">١</span></div>
+</div>
+</div>
+<div aria-label="التنقل بين الصفحات" class="page-actions glass-panel tafsir-page-actions">
+<button class="page-tool" id="previous-page" title="الصفحة السابقة"><svg class="mirror-icon"><use href="#i-next"></use></svg><span>السابقة</span></button>
+<span class="page-status tafsir-page-status"><span id="page-counter">الصفحة ١ من ٦٠٤</span></span>
+<button class="page-tool next-page" id="next-page" title="الصفحة التالية"><span>الصفحة التالية</span><svg><use href="#i-next"></use></svg></button>
+</div>
+</div>
+<aside aria-label="تفسير آيات الصفحة" class="tafsir-side glass-panel">
+<div class="tafsir-side-head">
+<div><span class="eyebrow">تفسير الصفحة</span><strong id="tafsir-side-title">التفسير الميسر</strong></div>
+<span class="tafsir-side-count" id="tafsir-side-count"></span>
+</div>
+<div class="tafsir-entries" id="tafsir-entries"><p class="dashboard-note">يتم تجهيز التفسير…</p></div>
+</aside>
+</div>
+<footer class="site-footer glass-panel">
+<div class="footer-brand">
+<img alt="" height="34" src="icons/logo-mishkat.png" width="34"/>
+<div><strong>مشكاة</strong><small>رفيقك مع القرآن الكريم</small></div>
+</div>
+<p class="footer-dua">اللَّهُمَّ اجْعَلِ الْقُرْآنَ رَبِيعَ قُلُوبِنَا وَنُورَ صُدُورِنَا</p>
+<div class="footer-links">
+<a href="mailto:ykdev321@gmail.com">تواصل معنا</a>
+</div>
+<div class="footer-credit"><span>صنع بواسطة</span><strong>YKdev</strong><i>•</i><a href="mailto:ykdev321@gmail.com">ykdev321@gmail.com</a></div>
+<nav aria-label="روابط الموقع" class="footer-links"><a href="about.html">عن مشكاة</a><a href="privacy.html">سياسة الخصوصية</a></nav></footer>
+</main>
+<div aria-live="polite" class="toast" id="toast" role="status"></div>
+<script defer="" src="assets/tafsir.js"></script>
+</body>
+</html>

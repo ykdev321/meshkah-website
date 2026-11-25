@@ -384,6 +384,7 @@ svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width:
 .search-field input { width: 100%; min-width: 0; border: 0; outline: 0; background: transparent; color: var(--ink); font-size: 10.5px; }
 .search-field input::placeholder { color: var(--muted-2); }
 .surah-list { flex: 1; overflow-y: auto; padding-inline-end: 2px; scrollbar-width: thin; scrollbar-color: rgba(var(--accent-rgb), .25) transparent; }
+.surah-list .library-verse-heading { margin: 10px 4px 6px; }
 .surah-item {
   width: 100%;
   padding: 8px 7px;
@@ -1305,3 +1306,116 @@ body.player-standalone .player-studio-page{padding-top:12px}
 body.player-standalone .main-nav .nav-link[data-nav="listen"]{border-color:rgba(var(--accent-rgb),.35);background:rgba(var(--accent-rgb),.09);color:var(--accent)}
 @media(max-width:760px){body.player-standalone .home-dashboard{padding-top:10px}body.player-standalone .dashboard-main{padding:15px;border-radius:20px}body.player-standalone .player-studio-grid{grid-template-columns:1fr 1fr;grid-template-areas:"center center" "surahs reciters";min-height:0}body.player-standalone .studio-list{max-height:250px}}
 @media(max-width:520px){.player-entry-card{padding:16px;gap:13px}.player-entry-art{width:62px;height:62px;flex-basis:62px;font-size:27px}.player-entry-copy h3{font-size:20px}body.player-standalone .player-studio-grid{grid-template-columns:1fr;grid-template-areas:"center" "surahs" "reciters"}body.player-standalone .studio-list{max-height:235px}body.player-standalone .dashboard-header h2{font-size:25px}}
+
+/* ------------------------------------------------------------
+   Audio progress bars: visible filled track (v8.2)
+   ------------------------------------------------------------ */
+.progress-row input[type=range],
+.studio-progress-block input[type=range],
+.studio-volume-row input[type=range] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 5px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .14);
+  outline-offset: 3px;
+}
+.progress-row input[type=range]::-webkit-slider-thumb,
+.studio-progress-block input[type=range]::-webkit-slider-thumb,
+.studio-volume-row input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 13px;
+  height: 13px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--accent-strong);
+  box-shadow: 0 0 0 4px rgba(var(--accent-rgb), .18);
+  cursor: pointer;
+  transition: transform .15s ease;
+}
+.progress-row input[type=range]::-moz-range-thumb,
+.studio-progress-block input[type=range]::-moz-range-thumb,
+.studio-volume-row input[type=range]::-moz-range-thumb {
+  width: 13px;
+  height: 13px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--accent-strong);
+  box-shadow: 0 0 0 4px rgba(var(--accent-rgb), .18);
+  cursor: pointer;
+}
+.progress-row input[type=range]::-moz-range-track,
+.studio-progress-block input[type=range]::-moz-range-track,
+.studio-volume-row input[type=range]::-moz-range-track { background: transparent; }
+.progress-row input[type=range]:hover::-webkit-slider-thumb,
+.studio-progress-block input[type=range]:hover::-webkit-slider-thumb { transform: scale(1.18); }
+.progress-row input[type=range]:disabled,
+.studio-progress-block input[type=range]:disabled { opacity: .45; }
+
+/* ------------------------------------------------------------
+   Links from the dashboard to the dedicated pages (v8.2)
+   ------------------------------------------------------------ */
+.dashboard-page-link { margin-top: 13px; min-height: 38px; font-size: 10.5px; }
+
+/* ------------------------------------------------------------
+   Hadith page (v8.2)
+   ------------------------------------------------------------ */
+.hadith-page { padding-bottom: 40px; }
+.hadith-hero h1 span { color: var(--accent); }
+.hadith-panel { margin: 26px 0 34px; padding: 22px; border-radius: 24px; }
+.hadith-controls { display: grid; grid-template-columns: minmax(170px, .8fr) minmax(200px, 1.2fr); gap: 10px; margin-bottom: 14px; }
+.hadith-page .hadith-layout { grid-template-columns: minmax(150px, .7fr) minmax(0, 1.6fr); }
+.hadith-page .hadith-list { max-height: 56vh; }
+.hadith-page .hadith-reading-card p { font-size: 15px; }
+.hadith-actions { display: flex; gap: 8px; margin-top: 14px; }
+.hadith-actions .btn { min-height: 34px; padding: 0 14px; font-size: 10px; }
+@media (max-width: 640px) { .hadith-controls { grid-template-columns: 1fr; } .hadith-page .hadith-list { max-height: 180px; } }
+
+/* ------------------------------------------------------------
+   Mushaf + tafsir page (v8.2)
+   ------------------------------------------------------------ */
+.tafsir-page { padding-bottom: 40px; }
+.tafsir-shell { padding-top: 18px; }
+.tafsir-tools { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; padding: 13px 18px; border-radius: 20px; }
+.tafsir-tools-title { display: grid; gap: 5px; min-width: 220px; flex: 1 1 260px; }
+.tafsir-tools-title strong { color: var(--muted); font-size: 10.5px; font-weight: 400; line-height: 1.8; }
+.tafsir-tools-controls { display: flex; align-items: flex-end; gap: 10px; flex-wrap: wrap; }
+.tafsir-tools-controls .dashboard-select-label { min-width: 140px; }
+.tafsir-tools-controls .tool-group { padding-bottom: 2px; }
+.tafsir-tools-controls .page-jump { padding-bottom: 2px; }
+.tafsir-layout { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(320px, .95fr); gap: 16px; align-items: start; margin-top: 16px; }
+.tafsir-mushaf-column { min-width: 0; display: flex; flex-direction: column; gap: 12px; }
+.tafsir-mushaf-column .mushaf-page { min-height: 880px; }
+.tafsir-page-actions { justify-content: space-between; }
+.tafsir-page-status { display: inline-flex; align-items: center; color: var(--muted-2); font-size: 9px; }
+.tafsir-side {
+  position: sticky;
+  top: 96px;
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 128px);
+  padding: 15px;
+  border-radius: 24px;
+}
+.tafsir-side-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding-bottom: 11px; border-bottom: 1px solid var(--rule); }
+.tafsir-side-head strong { display: block; margin-top: 4px; color: var(--ink); font-family: var(--serif); font-size: 19px; font-weight: 400; }
+.tafsir-side-count { color: var(--muted-2); font-size: 8.5px; white-space: nowrap; }
+.tafsir-entries { margin-top: 12px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-inline-end: 3px; scrollbar-width: thin; scrollbar-color: rgba(var(--accent-rgb), .25) transparent; }
+.tafsir-entry { border: 1px solid var(--rule); border-radius: 16px; padding: 13px 14px; background: rgba(255, 255, 255, .02); scroll-margin-top: 6px; transition: border-color .2s, background-color .2s; }
+.tafsir-entry.active { border-color: rgba(var(--accent-rgb), .5); background: rgba(var(--accent-rgb), .07); }
+.tafsir-entry header { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.tafsir-entry-ref { color: var(--accent); font-size: 9.5px; }
+.tafsir-entry-source { color: var(--muted-2); font-size: 7.5px; white-space: nowrap; }
+.tafsir-entry .entry-verse { margin: 9px 0 0; color: var(--ink); font: 17px/2 var(--quran); }
+.tafsir-entry .entry-tafsir { margin: 8px 0 0; padding-top: 9px; border-top: 1px dashed var(--rule); color: var(--ink-soft); font: 12.5px/2.05 var(--quran); white-space: pre-wrap; }
+@media (max-width: 1020px) {
+  .tafsir-layout { grid-template-columns: 1fr; }
+  .tafsir-side { position: static; max-height: none; }
+  .tafsir-entries { max-height: 60vh; }
+  .tafsir-mushaf-column .mushaf-page { min-height: 0; }
+}
+@media (max-width: 640px) {
+  .tafsir-tools { padding: 11px 13px; }
+  .tafsir-tools-controls .dashboard-select-label { min-width: 120px; flex: 1 1 130px; }
+}

@@ -30,6 +30,7 @@
     lastRead: readStorage(STORAGE.lastRead, null),
     translationVisible: false,
     clipEnd: null,
+    clipJustEndedAyah: null,
     currentSource: null,
     isSeeking: false,
     toastTimer: null,
@@ -322,7 +323,7 @@
       state.reciterId = (state.reciters.find(reciter => reciter.id === 'nasser_al_qatami_mp3quran') || state.reciters[0]).id;
       const savedVolume = Number(readStorage(STORAGE.audioVolume, 0.85));
       audio.volume = Number.isFinite(savedVolume) ? Math.max(0, Math.min(1, savedVolume)) : 0.85;
-      if ($('#studio-volume')) $('#studio-volume').value = String(audio.volume);
+      if ($('#studio-volume')) { $('#studio-volume').value = String(audio.volume); paintRangeFill($('#studio-volume')); }
       renderReciters();
       renderSurahList();
       renderPageIndex();
@@ -384,16 +385,42 @@
       const text = normalizeArabic(`${surah.id} ${surah.name} ${surah.name_en} ${surah.name_translation}`);
       return text.includes(search);
     });
-    if (!filtered.length) {
+    if (!filtered.length && !search.length) {
       list.innerHTML = '<div class="empty-state">لا توجد سورة بهذا الاسم.</div>';
       return;
     }
-    list.innerHTML = filtered.map(surah => `
+    // The same field also searches inside the verse text, so typing a word
+    // from an ayah lists the matching verses beneath the matching surahs.
+    const verseMatches = [];
+    if (search.length >= 2) {
+      for (const surah of state.quran) {
+        for (const verse of surah.array) {
+          if (normalizeArabic(verse.ar).includes(search) || normalizeArabic(verse.en || '').includes(search)) {
+            verseMatches.push({ surah, verse });
+            if (verseMatches.length >= 20) break;
+          }
+        }
+        if (verseMatches.length >= 20) break;
+      }
+    }
+    if (!filtered.length && !verseMatches.length) {
+      list.innerHTML = '<div class="empty-state">لا توجد سورة أو آية مطابقة.</div>';
+      return;
+    }
+    const surahHtml = filtered.map(surah => `
       <button class="surah-item ${Number(surah.id) === state.activeSurah ? 'active' : ''}" data-open-surah="${surah.id}">
         <span class="surah-number"><span>${toArabicDigits(surah.id)}</span></span>
         <span class="surah-item-copy"><strong>${escapeHTML(surah.name)}</strong><small>${escapeHTML(surah.name_translation || surah.name_en || '')}</small></span>
         <span class="surah-item-meta">${toArabicDigits(surah.array.length)} آية</span>
       </button>`).join('');
+    const verseHtml = verseMatches.length ? `
+      <p class="dashboard-note library-verse-heading">آيات مطابقة</p>` + verseMatches.map(({ surah, verse }) => `
+      <button class="surah-item saved-item" data-open-verse="${surah.id}:${verse.id}">
+        <span class="surah-number"><span>${toArabicDigits(surah.id)}</span></span>
+        <span class="surah-item-copy"><strong>${escapeHTML(surah.name)} · الآية ${toArabicDigits(verse.id)}</strong><small>${escapeHTML(verse.ar.slice(0, 60))}${verse.ar.length > 60 ? '…' : ''}</small></span>
+        <span class="surah-item-meta">${toArabicDigits(verse.id)}</span>
+      </button>`).join('') : '';
+    list.innerHTML = surahHtml + verseHtml;
   }
 
   function renderBookmarkList(target) {
@@ -515,6 +542,12 @@
     }
   }
 
+  // Offline page download plan: page 1 is fetched first and awaited, then the
+  // first 200 pages as the priority batch, then the remaining pages continue
+  // in the background so the whole mushaf stays available offline.
+  const OFFLINE_PRIORITY_PAGES = 200;
+  const OFFLINE_CONTINUE_AFTER_PRIORITY = true;
+
   async function precacheAllMushafPages() {
     if (!('caches' in window) || !navigator.onLine) return;
     const completedKey = 'mishkat.mushaf-layout-cache.v2';
@@ -527,42 +560,46 @@
     const fallback = page => `https://raw.githubusercontent.com/ouryhamdalaye/madinah-mushaf-json/main/pages/page-${String(page).padStart(3, '0')}.json`;
     let completed = 0;
     let failed = 0;
-    let nextPage = 1;
-    showToast('يتم الآن حفظ صفحات المصحف الـ604 على هذا الجهاز للاستخدام دون اتصال...');
-    async function worker() {
-      while (true) {
-        const page = nextPage++;
-        if (page > 604) return;
-        const key = primary(page);
-        try {
-          const cached = await cache.match(key);
-          if (cached) {
-            const saved = await cached.clone().json();
-            if (saved?.page === page && Array.isArray(saved.lines) && Array.isArray(saved.verses)) {
-              completed++;
-              continue;
-            }
+    const lastPlannedPage = OFFLINE_CONTINUE_AFTER_PRIORITY ? 604 : OFFLINE_PRIORITY_PAGES;
+    const order = [1, ...Array.from({ length: lastPlannedPage - 1 }, (_, index) => index + 2)];
+    let cursor = 0;
+    showToast(`يبدأ حفظ صفحات المصحف من الصفحة ١ ثم أول ${toArabicDigits(OFFLINE_PRIORITY_PAGES)} صفحة للاستخدام دون اتصال...`);
+    async function cachePage(page) {
+      const key = primary(page);
+      try {
+        const cached = await cache.match(key);
+        if (cached) {
+          const saved = await cached.clone().json();
+          if (saved?.page === page && Array.isArray(saved.lines) && Array.isArray(saved.verses)) {
+            completed++;
+            return;
           }
-          let data = null;
-          let lastError = null;
-          for (const url of [key, fallback(page)]) {
-            try {
-              const response = await fetch(url, { mode: 'cors', cache: 'force-cache' });
-              if (!response.ok) throw new Error(`HTTP ${response.status}`);
-              const candidate = await response.json();
-              if (candidate?.page !== page || !Array.isArray(candidate.lines) || !Array.isArray(candidate.verses)) throw new Error('بيانات الصفحة غير مكتملة');
-              data = candidate;
-              break;
-            } catch (error) { lastError = error; }
-          }
-          if (!data) throw lastError || new Error('تعذر تحميل الصفحة');
-          await cache.put(key, new Response(JSON.stringify(data), { status: 200, headers: { 'Content-Type': 'application/json; charset=utf-8' } }));
-          completed++;
-          if (completed % 50 === 0) { writeStorage(completedKey, { complete: false, pages: completed, failed, savedAt: new Date().toISOString() }); updateDashboardProgress(); console.info(`Mishkat offline pages cached: ${completed}/604`); }
-        } catch (error) {
-          failed++;
-          console.info(`Could not cache Mushaf page ${page}:`, error);
         }
+        let data = null;
+        let lastError = null;
+        for (const url of [key, fallback(page)]) {
+          try {
+            const response = await fetch(url, { mode: 'cors', cache: 'force-cache' });
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            const candidate = await response.json();
+            if (candidate?.page !== page || !Array.isArray(candidate.lines) || !Array.isArray(candidate.verses)) throw new Error('بيانات الصفحة غير مكتملة');
+            data = candidate;
+            break;
+          } catch (error) { lastError = error; }
+        }
+        if (!data) throw lastError || new Error('تعذر تحميل الصفحة');
+        await cache.put(key, new Response(JSON.stringify(data), { status: 200, headers: { 'Content-Type': 'application/json; charset=utf-8' } }));
+        completed++;
+        if (completed % 50 === 0 || completed === OFFLINE_PRIORITY_PAGES) { writeStorage(completedKey, { complete: false, pages: completed, failed, savedAt: new Date().toISOString() }); updateDashboardProgress(); console.info(`Mishkat offline pages cached: ${completed}/${lastPlannedPage}`); }
+      } catch (error) {
+        failed++;
+        console.info(`Could not cache Mushaf page ${page}:`, error);
+      }
+    }
+    async function worker() {
+      while (cursor < order.length) {
+        const page = order[cursor++];
+        await cachePage(page);
       }
     }
     try {
@@ -570,13 +607,18 @@
       const lowMemory = Number(navigator.deviceMemory || 4) <= 2;
       const slowNetwork = connection.saveData || ['slow-2g', '2g'].includes(connection.effectiveType);
       const workers = (lowMemory || slowNetwork) ? 1 : 2;
+      // Page 1 is downloaded on its own first so it is ready immediately.
+      await cachePage(order[cursor++]);
       await Promise.all(Array.from({ length: workers }, () => worker()));
+      if (completed >= OFFLINE_PRIORITY_PAGES) {
+        showToast(`اكتمل حفظ أول ${toArabicDigits(Math.min(completed, OFFLINE_PRIORITY_PAGES))} صفحة من المصحف للاستخدام دون اتصال.`);
+      }
       if (completed === 604 && failed === 0) {
         writeStorage(completedKey, { complete: true, pages: 604, savedAt: new Date().toISOString() });
         showToast('اكتمل حفظ صفحات المصحف الـ604 للاستخدام دون اتصال.');
       } else {
         writeStorage(completedKey, { complete: false, pages: completed, failed, savedAt: new Date().toISOString() });
-        showToast(`تم حفظ ${toArabicDigits(completed)} من ٦٠٤ صفحة؛ سيُستكمل الحفظ عند توفر الإنترنت.`);
+        if (completed < 604) showToast(`تم حفظ ${toArabicDigits(completed)} من ٦٠٤ صفحة؛ سيُستكمل الحفظ عند توفر الإنترنت.`);
       }
     } catch (error) {
       console.info('Mushaf page pre-caching interrupted; it will resume on the next visit.', error);
@@ -885,41 +927,6 @@
     } catch (error) {
       stopPageRepeat();
       showReaderMessage(`تعذر تكرار الصفحة: ${error.message}`);
-    }
-  }
-
-  async function downloadPageImage() {
-    const button = $('#download-page-image');
-    button.disabled = true;
-    button.classList.add('loading');
-    try {
-      if ($('#quran-content').querySelector('.loading-state')) await renderReader();
-      if ($('#quran-content').querySelector('.loading-state')) throw new Error('انتظر اكتمال تحميل صفحة المصحف ثم أعد المحاولة.');
-      if (!window.html2canvas) {
-        await new Promise((resolve, reject) => {
-          const script = document.createElement('script');
-          script.src = 'https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js';
-          script.onload = resolve;
-          script.onerror = () => reject(new Error('تعذر تحميل أداة إنشاء الصورة.'));
-          document.head.appendChild(script);
-        });
-      }
-      if (document.fonts?.ready) await document.fonts.ready;
-      const canvas = await window.html2canvas($('#mushaf-page'), { scale: 2, useCORS: true, backgroundColor: null, logging: false });
-      const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
-      if (!blob) throw new Error('تعذر إنشاء ملف الصورة.');
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `mishkat-page-${state.pageIndex + 1}.png`;
-      document.body.appendChild(link); link.click(); link.remove();
-      setTimeout(() => URL.revokeObjectURL(url), 1500);
-      showToast('تم تجهيز صورة الصفحة');
-    } catch (error) {
-      showToast(`${error.message} تحقق من اتصال الإنترنت ثم أعد المحاولة.`);
-    } finally {
-      button.disabled = false;
-      button.classList.remove('loading');
     }
   }
 
@@ -1303,6 +1310,16 @@
     }
   }
 
+  function paintRangeFill(input) {
+    if (!input) return;
+    const min = Number(input.min || 0);
+    const max = Number(input.max) || 1000;
+    const ratio = Math.max(0, Math.min(1, (Number(input.value) - min) / (max - min || 1)));
+    const percent = `${(ratio * 100).toFixed(1)}%`;
+    const direction = getComputedStyle(input).direction === 'rtl' ? '270deg' : '90deg';
+    input.style.background = `linear-gradient(${direction}, var(--accent) 0%, var(--accent) ${percent}, rgba(255, 255, 255, .14) ${percent}, rgba(255, 255, 255, .14) 100%)`;
+  }
+
   function updateProgress() {
     const duration = audio.duration;
     const current = audio.currentTime || 0;
@@ -1320,11 +1337,19 @@
     if (studioCurrent) studioCurrent.textContent = formatTime(current);
     if (studioDuration) studioDuration.textContent = formatTime(duration);
     if (studioProgressControl) studioProgressControl.disabled = !(Number.isFinite(duration) && duration > 0);
+    paintRangeFill($('#audio-progress'));
+    paintRangeFill(studioProgressControl);
     if (state.clipEnd && current >= state.clipEnd - 0.035) {
       audio.pause();
       state.clipEnd = null;
       if (state.pageRepeat) { advancePageRepeat(); return; }
+      // A clipped single-verse playback must not advance the active-verse
+      // highlight into the next verse - not on this final tick, and not on any
+      // stray timeupdate that fires after the pause. The guard is cleared when
+      // playback resumes or the user seeks.
+      state.clipJustEndedAyah = state.activeAyah;
       updatePlayButton();
+      return;
     }
     if (state.chapterRows.length) {
       const timeMs = current * 1000;
@@ -1334,23 +1359,26 @@
         else break;
       }
       if (active) {
-        markListenedVerse(state.activeSurah, active.ayahId);
-        if (active.ayahId !== state.activeAyah) {
-          setActiveVerse(active.ayahId, false);
-          updatePlayerLabels();
-        }
-        const activeWord = active.words.find(item => item.start <= timeMs && timeMs <= item.end);
-        if (activeWord && state.pageMapOfficial) {
-          syncPageToActiveWord(state.activeSurah, active.ayahId, activeWord.index);
-        } else {
-          const versePage = pageIndexForVerse(state.activeSurah, active.ayahId);
-          if (versePage !== state.pageIndex && !state.pageSyncPending) {
-            state.pageIndex = versePage;
-            renderReader();
+        const holdClippedVerse = state.clipJustEndedAyah && audio.paused && active.ayahId !== state.clipJustEndedAyah;
+        if (!holdClippedVerse) {
+          markListenedVerse(state.activeSurah, active.ayahId);
+          if (active.ayahId !== state.activeAyah) {
+            setActiveVerse(active.ayahId, false);
+            updatePlayerLabels();
           }
+          const activeWord = active.words.find(item => item.start <= timeMs && timeMs <= item.end);
+          if (activeWord && state.pageMapOfficial) {
+            syncPageToActiveWord(state.activeSurah, active.ayahId, activeWord.index);
+          } else {
+            const versePage = pageIndexForVerse(state.activeSurah, active.ayahId);
+            if (versePage !== state.pageIndex && !state.pageSyncPending) {
+              state.pageIndex = versePage;
+              renderReader();
+            }
+          }
+          paintActiveWord(current);
         }
       }
-      paintActiveWord(current);
     }
   }
 
@@ -1411,7 +1439,7 @@
       tab.classList.toggle('active', active);
       tab.setAttribute('aria-selected', String(active));
     });
-    $('#surah-search').placeholder = mode === 'bookmarks' ? 'ابحث في المحفوظات...' : 'ابحث عن سورة...';
+    $('#surah-search').placeholder = mode === 'bookmarks' ? 'ابحث في المحفوظات...' : 'ابحث عن سورة أو آية...';
     renderSurahList();
   }
 
@@ -1428,6 +1456,13 @@
     state.dailyVerse = { s: Number(entry.surah.id), a: Number(entry.verse.id) };
     $('#daily-verse-text').textContent = entry.verse.ar;
     $('#daily-verse-reference').textContent = `سورة ${entry.surah.name} · الآية ${dashboardNumber(entry.verse.id)}`;
+  }
+  async function playDailyVerse() {
+    const target = state.dailyVerse;
+    if (!target) return;
+    if (state.pageRepeat) stopPageRepeat();
+    await openSurah(target.s, target.a, false);
+    await playAyah(target.a);
   }
   async function openDailyVerseInReader() {
     const target = state.dailyVerse;
@@ -1729,7 +1764,7 @@
           const candidate = await response.clone().json();
           validateHadithEdition(candidate, config);
           data = candidate;
-          try { if (cache) { const oldKeys = await cache.keys(); for (const oldKey of oldKeys) await cache.delete(oldKey); await cache.put(url, response.clone()); } } catch (_) {}
+          try { if (cache) await cache.put(url, response.clone()); } catch (_) {}
           break;
         } catch (error) { lastError = error; }
       }
@@ -1982,7 +2017,6 @@
   $('#previous-page').addEventListener('click', () => goToPage(state.pageIndex));
   $('#next-page').addEventListener('click', () => goToPage(state.pageIndex + 2));
   $('#repeat-page').addEventListener('click', togglePageRepeat);
-  $('#download-page-image').addEventListener('click', downloadPageImage);
   $('#download-surah-audio').addEventListener('click', downloadCurrentSurahAudio);
   $('#page-number-input').addEventListener('change', event => { const n = Number(event.target.value); if (Number.isFinite(n)) goToPage(n); });
   $('#page-number-input').addEventListener('keydown', event => { if (event.key === 'Enter') { event.preventDefault(); $('#page-number-input').blur(); } });
@@ -1992,7 +2026,7 @@
   audio.addEventListener('timeupdate', updateProgress);
   audio.addEventListener('loadedmetadata', updateProgress);
   audio.addEventListener('durationchange', updateProgress);
-  audio.addEventListener('play', () => { updatePlayButton(); updatePlayerLabels(); markListenedVerse(state.activeSurah,state.activeAyah); });
+  audio.addEventListener('play', () => { state.clipJustEndedAyah = null; updatePlayButton(); updatePlayerLabels(); markListenedVerse(state.activeSurah,state.activeAyah); });
   audio.addEventListener('pause', () => { updatePlayButton(); updatePlayerLabels(); });
   audio.addEventListener('ended', async () => {
     state.clipEnd = null;
@@ -2013,9 +2047,11 @@
   $('#audio-progress').addEventListener('input', () => {
     state.isSeeking = true;
     $('#current-time').textContent = formatTime((Number($('#audio-progress').value) / 1000) * (audio.duration || 0));
+    paintRangeFill($('#audio-progress'));
   });
   $('#audio-progress').addEventListener('change', () => {
     if (Number.isFinite(audio.duration) && audio.duration > 0) audio.currentTime = (Number($('#audio-progress').value) / 1000) * audio.duration;
+    state.clipJustEndedAyah = null;
     state.isSeeking = false;
   });
   $('#playback-speed').addEventListener('change', event => { audio.playbackRate = Number(event.target.value) || 1; });
@@ -2120,7 +2156,7 @@
   $('#confirm-page-read').addEventListener('click', markCurrentPageRead);
   $('#dashboard-continue').addEventListener('click', async () => { const saved=state.lastConfirmedRead||{s:1,a:1}; await openSurah(saved.s,saved.a,true); setNavState('reader'); });
   $('#hero-browse').addEventListener('click', () => { setNavState('reader'); });
-  $('#daily-ayah-play').addEventListener('click', () => { const d=state.dailyVerse; if(d) showDashboardView('player', d); });
+  $('#daily-ayah-play').addEventListener('click', () => playDailyVerse());
   $('#daily-ayah-open').addEventListener('click', openDailyVerseInReader);
   $('#dashboard-surah-select').addEventListener('change', event => renderSurahInformation(Number(event.target.value)));
   $('#surah-info-open').addEventListener('click', async () => { const sid=Number($('#dashboard-surah-select').value); await openSurah(sid,1,true); setNavState('reader'); });
@@ -2134,9 +2170,9 @@
   $('#studio-reciter-list')?.addEventListener('click', event => { const item=event.target.closest('[data-studio-reciter]'); if(item) selectStudioReciter(item.dataset.studioReciter); });
   $('#studio-surah-search')?.addEventListener('input', event => renderStudioSurahList(event.target.value));
   $('#studio-reciter-search')?.addEventListener('input', event => renderStudioReciterList(event.target.value));
-  $('#studio-progress')?.addEventListener('input', () => { state.isSeeking=true; const d=audio.duration||0; $('#studio-current-time').textContent=formatTime((Number($('#studio-progress').value)/1000)*d); });
+  $('#studio-progress')?.addEventListener('input', () => { state.isSeeking=true; const d=audio.duration||0; $('#studio-current-time').textContent=formatTime((Number($('#studio-progress').value)/1000)*d); paintRangeFill($('#studio-progress')); });
   $('#studio-progress')?.addEventListener('change', () => { if(Number.isFinite(audio.duration)&&audio.duration>0) audio.currentTime=(Number($('#studio-progress').value)/1000)*audio.duration; state.isSeeking=false; });
-  $('#studio-volume')?.addEventListener('input', event => { audio.volume=Math.max(0,Math.min(1,Number(event.target.value))); writeStorage(STORAGE.audioVolume,audio.volume); $('#studio-mute').textContent=audio.volume===0?'◖×':'◖))'; });
+  $('#studio-volume')?.addEventListener('input', event => { audio.volume=Math.max(0,Math.min(1,Number(event.target.value))); writeStorage(STORAGE.audioVolume,audio.volume); $('#studio-mute').textContent=audio.volume===0?'◖×':'◖))'; paintRangeFill(event.target); });
   $('#studio-mute')?.addEventListener('click', () => { if(audio.volume>0){state.previousVolume=audio.volume;audio.volume=0;}else audio.volume=state.previousVolume||0.85; $('#studio-volume').value=String(audio.volume); writeStorage(STORAGE.audioVolume,audio.volume); $('#studio-mute').textContent=audio.volume===0?'◖×':'◖))'; });
   $('#studio-speed')?.addEventListener('change', event => { audio.playbackRate=Number(event.target.value)||1; $('#playback-speed').value=event.target.value; });
   $('#open-in-surah-player').addEventListener('click', openSurahInPlayer);
