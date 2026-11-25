@@ -1419,3 +1419,19 @@ body.player-standalone .main-nav .nav-link[data-nav="listen"]{border-color:rgba(
   .tafsir-tools { padding: 11px 13px; }
   .tafsir-tools-controls .dashboard-select-label { min-width: 120px; flex: 1 1 130px; }
 }
+
+/* First-visit onboarding tour */
+.tour-catch { position: fixed; inset: 0; z-index: 150; background: transparent; }
+.tour-spotlight { position: fixed; z-index: 151; pointer-events: none; border-radius: 14px; box-shadow: 0 0 0 9999px rgba(4, 7, 8, .74); outline: 2px solid var(--accent); outline-offset: 3px; animation: tour-spotlight-pulse 1.6s ease-in-out infinite; }
+@keyframes tour-spotlight-pulse { 0%, 100% { outline-color: var(--accent); } 50% { outline-color: rgba(var(--accent-rgb), .35); } }
+.tour-card { position: fixed; z-index: 152; width: min(340px, calc(100vw - 32px)); padding: 18px 18px 14px; border-radius: 18px; background: var(--glass-strong); border: 1px solid var(--glass-border); box-shadow: var(--glass-shadow); backdrop-filter: blur(var(--blur)); -webkit-backdrop-filter: blur(var(--blur)); color: var(--ink); text-align: start; }
+.tour-card-eyebrow { display: block; margin-bottom: 6px; }
+.tour-card-title { margin: 0 0 8px; font-size: 19px; font-weight: 700; color: var(--accent-strong); }
+.tour-card-body { margin: 0 0 14px; font-size: 14.5px; line-height: 1.85; color: var(--ink-soft); }
+.tour-card-footer { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.tour-card-counter { font-size: 12.5px; color: var(--muted); }
+.tour-card-next { min-width: 92px; }
+.tour-card-next:disabled { opacity: .55; cursor: wait; }
+.tour-skip { position: fixed; top: 12px; left: 50%; transform: translateX(-50%); z-index: 153; padding: 9px 22px; border-radius: 999px; border: 1px solid var(--glass-border); background: var(--glass-strong); color: var(--ink); font-family: var(--sans); font-size: 14px; font-weight: 600; cursor: pointer; box-shadow: var(--glass-shadow); backdrop-filter: blur(var(--blur)); -webkit-backdrop-filter: blur(var(--blur)); }
+.tour-skip:hover { color: var(--accent-strong); border-color: rgba(var(--accent-rgb), .45); }
+@media (prefers-reduced-motion: reduce) { .tour-spotlight { animation: none; } }

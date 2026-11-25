@@ -1,5 +1,5 @@
 // Mishkat v8.3 — keeps every downloaded hadith edition side by side and falls back to the app shell for the bundled one.
-const CACHE_NAME = 'mishkat-app-v8-3-2-resume-last-page';
+const CACHE_NAME = 'mishkat-app-v8-4-0-onboarding-tour';
 const TAFSIR_CACHE = 'mishkat-tafsir-v1';
 const HADITH_CACHE = 'mishkat-hadith-local-v2';
 const APP_FILES = [

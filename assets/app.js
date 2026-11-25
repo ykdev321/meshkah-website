@@ -350,6 +350,7 @@
       updatePlayButton();
       if (document.body.classList.contains('player-standalone')) showDashboardView('player');
       registerServiceWorker();
+      startOnboardingTour();
       // Use the canonical Madinah Mushaf page starts when available. The reader remains usable if it is offline.
       loadOfficialPageMap().then(loaded => {
         if (loaded) { state.pageIndex = pageIndexForVerse(state.activeSurah, state.activeAyah); renderReader(); }
@@ -2250,6 +2251,196 @@
       openSearch();
     }
   });
+
+
+  // ------------------------------------------------------------------
+  // First-visit onboarding tour: points at real controls, runs once only.
+  // ------------------------------------------------------------------
+  const TOUR_DONE_KEY = 'mishkat.tutorialDone.v1';
+
+  function hasPriorSiteUsage() {
+    try {
+      if (readStorage(STORAGE.lastView, null) || readStorage(STORAGE.lastRead, null)) return true;
+      if (readStorage(STORAGE.lastListened, null)) return true;
+      if (Object.keys(state.readPageRecords || {}).length) return true;
+      if ((state.bookmarks || []).length) return true;
+      if (state.heardAyahs && state.heardAyahs.size) return true;
+    } catch (_) { /* storage unavailable */ }
+    return false;
+  }
+
+  function startOnboardingTour() {
+    if (document.body.classList.contains('player-standalone')) return;
+    if (readStorage(TOUR_DONE_KEY, false)) return;
+    // Never show twice: mark as done the moment the tour starts.
+    writeStorage(TOUR_DONE_KEY, true);
+    // Visitors who already used the site before this tour existed are not
+    // first-time visitors; their saved reading/listening state proves it.
+    if (hasPriorSiteUsage()) return;
+
+    const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+    const catchLayer = document.createElement('div');
+    catchLayer.className = 'tour-catch';
+    const spotlight = document.createElement('div');
+    spotlight.className = 'tour-spotlight';
+    spotlight.hidden = true;
+    const skipBtn = document.createElement('button');
+    skipBtn.type = 'button';
+    skipBtn.className = 'tour-skip';
+    skipBtn.textContent = 'تخطى';
+    const card = document.createElement('div');
+    card.className = 'tour-card';
+    card.setAttribute('role', 'dialog');
+    card.setAttribute('aria-live', 'polite');
+    card.innerHTML = `
+      <span class="eyebrow tour-card-eyebrow">جولة مشكاة</span>
+      <h2 class="tour-card-title"></h2>
+      <p class="tour-card-body"></p>
+      <div class="tour-card-footer">
+        <span class="tour-card-counter"></span>
+        <button type="button" class="btn btn-primary tour-card-next">التالي</button>
+      </div>`;
+    document.body.append(catchLayer, spotlight, card, skipBtn);
+
+    const titleEl = card.querySelector('.tour-card-title');
+    const bodyEl = card.querySelector('.tour-card-body');
+    const counterEl = card.querySelector('.tour-card-counter');
+    const nextBtn = card.querySelector('.tour-card-next');
+
+    let active = true;
+    let stepToken = 0;
+    let currentTarget = null;
+    let currentStep = 0;
+
+    const steps = [
+      {
+        title: 'التشغيل بالضغط على الآية',
+        body: 'اضغط على أي كلمة أو آية في المصحف لتشغيل تلاوتها مباشرة. هذه أول آية من سورة الفاتحة؛ جرّب الضغط عليها بعد انتهاء الجولة.',
+        locate: async () => {
+          setNavState('reader');
+          await openSurah(1, 1, false);
+          await wait(420);
+          return $('#quran-content .quran-word[data-surah="1"][data-ayah="1"]') || $('#quran-content .quran-word');
+        }
+      },
+      {
+        title: 'هنا التفسير',
+        body: 'من تبويب «التفسير» اختر السورة والآية واقرأ معناها من التفسير الميسر وابن كثير والسعدي والقرطبي والطبري.',
+        locate: async () => {
+          showWelcome();
+          showDashboardView('tafsir');
+          await wait(250);
+          return $('[data-dashboard-view="tafsir"]');
+        }
+      },
+      {
+        title: 'هنا الأحاديث',
+        body: 'من تبويب «الأحاديث» تقرأ الأربعون النووية وصحيح البخاري وصحيح مسلم وغيرها، مع بحث داخل كل كتاب.',
+        locate: async () => {
+          showDashboardView('hadith');
+          await wait(250);
+          return $('[data-dashboard-view="hadith"]');
+        }
+      },
+      {
+        title: 'وهنا البحث',
+        body: 'زر «بحث» في الأعلى يفتح البحث في القرآن كاملاً: اكتب أي كلمة من آية لتصل إليها فورًا، وتجد تبويب «البحث عن آية» أيضًا داخل فهرس المصحف.',
+        locate: async () => {
+          showWelcome();
+          await wait(150);
+          return $('#search-open');
+        }
+      },
+      {
+        title: 'مشكاة بين يديك',
+        body: 'انتهت الجولة. تصفّح المصحف، استمع بصوت قارئك المفضل، وأكد قراءة صفحاتك لتتابع تقدمك. بالتوفيق في رحلتك مع القرآن.',
+        locate: async () => null
+      }
+    ];
+
+    function positionTour() {
+      if (!active) return;
+      const pad = 8;
+      let rect = null;
+      if (currentTarget && document.contains(currentTarget)) {
+        rect = currentTarget.getBoundingClientRect();
+        if (rect.width < 2 || rect.height < 2) rect = null;
+      }
+      if (rect) {
+        spotlight.hidden = false;
+        spotlight.style.top = `${rect.top - pad}px`;
+        spotlight.style.left = `${rect.left - pad}px`;
+        spotlight.style.width = `${rect.width + pad * 2}px`;
+        spotlight.style.height = `${rect.height + pad * 2}px`;
+      } else {
+        spotlight.hidden = true;
+      }
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      const cardRect = card.getBoundingClientRect();
+      let top;
+      if (rect) {
+        const below = rect.bottom + pad + 14;
+        top = (below + cardRect.height <= vh - 12) ? below : Math.max(12, rect.top - pad - 14 - cardRect.height);
+      } else {
+        top = Math.max(12, (vh - cardRect.height) / 2);
+      }
+      const centered = rect ? rect.left + rect.width / 2 - cardRect.width / 2 : (vw - cardRect.width) / 2;
+      const left = Math.min(Math.max(16, centered), Math.max(16, vw - cardRect.width - 16));
+      card.style.top = `${top}px`;
+      card.style.left = `${left}px`;
+      requestAnimationFrame(positionTour);
+    }
+
+    async function showStep(index) {
+      const token = ++stepToken;
+      currentStep = index;
+      const step = steps[index];
+      titleEl.textContent = step.title;
+      bodyEl.textContent = step.body;
+      counterEl.textContent = `${toArabicDigits(index + 1)} من ${toArabicDigits(steps.length)}`;
+      nextBtn.textContent = index === steps.length - 1 ? 'ابدأ الآن' : 'التالي';
+      nextBtn.disabled = true;
+      let target = null;
+      try { target = await step.locate(); } catch (_) { target = null; }
+      if (!active || token !== stepToken) return;
+      currentTarget = target || null;
+      if (currentTarget) {
+        try { currentTarget.scrollIntoView({ block: 'center', inline: 'center', behavior: 'smooth' }); } catch (_) { /* older browsers */ }
+      } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+      nextBtn.disabled = false;
+    }
+
+    function endTour() {
+      if (!active) return;
+      active = false;
+      stepToken += 1;
+      document.removeEventListener('keydown', onKeydown, true);
+      catchLayer.remove();
+      spotlight.remove();
+      card.remove();
+      skipBtn.remove();
+      showWelcome();
+    }
+
+    function onKeydown(event) {
+      if (event.key === 'Escape') { event.preventDefault(); endTour(); }
+    }
+
+    nextBtn.addEventListener('click', () => {
+      if (!active) return;
+      if (currentStep >= steps.length - 1) endTour();
+      else showStep(currentStep + 1);
+    });
+    skipBtn.addEventListener('click', endTour);
+    document.addEventListener('keydown', onKeydown, true);
+
+    requestAnimationFrame(positionTour);
+    showStep(0);
+  }
 
   initialize();
 })();
