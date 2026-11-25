@@ -1985,7 +1985,7 @@
     }
   });
   $('#surah-search').addEventListener('input', () => renderSurahList());
-  $$('.library-tab').forEach(tab => tab.addEventListener('click', () => setLibraryMode(tab.dataset.library)));
+  $$('.library-tab').forEach(tab => tab.addEventListener('click', () => { if (tab.dataset.library === 'verse-search') { openSearch(); return; } setLibraryMode(tab.dataset.library); }));
 
   $('#quran-content').addEventListener('click', async event => {
     const word = event.target.closest('.quran-word');
