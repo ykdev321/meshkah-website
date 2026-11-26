@@ -507,7 +507,7 @@
       `https://raw.githubusercontent.com/ouryhamdalaye/madinah-mushaf-json/main/pages/page-${pad}.json`
     ];
     const request = (async () => {
-      const cacheKey = `mishkat-mushaf-layout-v2`;
+      const cacheKey = `mishkat-mushaf-layout-v3`;
       let cache = null;
       try { if ('caches' in window) cache = await caches.open(cacheKey); } catch (_) { cache = null; }
       let lastError;
@@ -520,7 +520,7 @@
               if (data?.page === page && Array.isArray(data.lines) && Array.isArray(data.verses)) return data;
             }
           }
-          const response = await fetch(url, { mode: 'cors', cache: 'force-cache' });
+          const response = await fetch(url, { mode: 'cors', cache: 'no-cache' });
           if (!response.ok) throw new Error(`تعذر تحميل صفحة المصحف ${page} (${response.status}).`);
           const data = await response.clone().json();
           if (data?.page !== page || !Array.isArray(data.lines) || !Array.isArray(data.verses)) throw new Error('بنية بيانات الصفحة غير صحيحة.');
@@ -555,9 +555,11 @@
 
   async function precacheAllMushafPages() {
     if (!('caches' in window) || !navigator.onLine) return;
-    const completedKey = 'mishkat.mushaf-layout-cache.v2';
+    const completedKey = 'mishkat.mushaf-layout-cache.v3';
     if (readStorage(completedKey, null)?.complete === true) return;
-    const cacheName = 'mishkat-mushaf-layout-v2';
+    const cacheName = 'mishkat-mushaf-layout-v3';
+    // Drop the previous layout bucket so corrected pages replace stale copies.
+    try { await caches.delete('mishkat-mushaf-layout-v2'); } catch (_) { /* optional cleanup */ }
     let cache;
     try { cache = await caches.open(cacheName); }
     catch (error) { console.info('Browser cache storage is unavailable; page layouts cannot be saved offline.', error); return; }
@@ -584,7 +586,7 @@
         let lastError = null;
         for (const url of [key, fallback(page)]) {
           try {
-            const response = await fetch(url, { mode: 'cors', cache: 'force-cache' });
+            const response = await fetch(url, { mode: 'cors', cache: 'no-cache' });
             if (!response.ok) throw new Error(`HTTP ${response.status}`);
             const candidate = await response.json();
             if (candidate?.page !== page || !Array.isArray(candidate.lines) || !Array.isArray(candidate.verses)) throw new Error('بيانات الصفحة غير مكتملة');
@@ -1541,7 +1543,7 @@
     const lastVerse = last ? getVerse(last.s, last.a) : null;
     const versePreview = lastVerse?.ar ? `${lastVerse.ar.slice(0, 54)}${lastVerse.ar.length > 54 ? '…' : ''}` : '';
     $('#last-listened-ayah').textContent = last ? `الآية ${dashboardNumber(last.a)} · ${versePreview} · ${last.reciter || getReciter()?.name_ar || ''}` : 'ابدأ الاستماع لتظهر هنا';
-    $('#offline-pages-count').textContent = readStorage('mishkat.mushaf-layout-cache.v2', null)?.complete ? '٦٠٤ / ٦٠٤' : `${dashboardNumber(readStorage('mishkat.mushaf-layout-cache.v2', null)?.pages || 0)} / ٦٠٤`;
+    $('#offline-pages-count').textContent = readStorage('mishkat.mushaf-layout-cache.v3', null)?.complete ? '٦٠٤ / ٦٠٤' : `${dashboardNumber(readStorage('mishkat.mushaf-layout-cache.v3', null)?.pages || 0)} / ٦٠٤`;
     const activeSurah = getSurah(state.activeSurah);
     if (activeSurah) {
       const albumSurahName = $('#album-surah-name');
