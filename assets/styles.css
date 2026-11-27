@@ -1512,3 +1512,12 @@ body.light-theme .continuity-bar { background: rgba(250, 247, 240, .94); border-
   transition: background-color .2s, border-color .2s;
 }
 .reader-message-btn:hover { background: rgba(var(--accent-rgb), .22); border-color: rgba(var(--accent-rgb), .65); }
+
+
+/* Lite mode (weak devices only: <4GB RAM, <=2 CPU cores, data saver or reduced motion).
+   Same layout and colours; blur, motion and heavy shadows are switched off. */
+html.lite *, html.lite *::before, html.lite *::after { animation: none !important; transition: none !important; -webkit-backdrop-filter: none !important; backdrop-filter: none !important; scroll-behavior: auto !important; }
+html.lite .hero-aura { filter: none !important; }
+html.lite body { --glass-shadow: inset 0 1px 0 rgba(255, 255, 255, .09); }
+html.lite body.light-theme { --glass-shadow: inset 0 1px 0 rgba(255, 255, 255, .85); }
+html.lite body:not(.light-theme) .topbar { background: rgba(8, 9, 10, .86); }

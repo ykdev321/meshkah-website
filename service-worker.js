@@ -5,14 +5,24 @@ const HADITH_CACHE = 'mishkat-hadith-local-v2';
 const APP_FILES = [
   './','./index.html','./player.html','./about.html','./privacy.html','./hadith.html','./tafsir.html','./assets/styles.css','./assets/app.js','./assets/audio-continuity.js','./assets/about.js','./assets/hadith.js','./assets/tafsir.js',
   './assets/fonts/readex-pro-ar.woff2','./assets/fonts/readex-pro-latin.woff2','./assets/fonts/amiri-400-ar.woff2','./assets/fonts/amiri-700-ar.woff2','./assets/fonts/noto-naskh-arabic-ar.woff2',
-  './manifest.webmanifest','./icons/favicon.svg','./icons/logo-mishkat.png','./icons/og-cover.jpg','./data/quran.json','./data/reciters.json','./data/verse-to-page.json','./data/tafsir/index.json','./data/hadith/ara-nawawi.min.json'
+  './manifest.webmanifest','./icons/favicon.svg','./icons/logo-mishkat.png','./icons/logo-mishkat-256.png','./icons/og-cover.jpg'
 ];
+// Large offline data is saved later, when the page asks for it after it has settled,
+// so the first visit on a weak phone is not slowed down by the install step.
+const DATA_FILES = ['./data/quran.json','./data/reciters.json','./data/verse-to-page.json','./data/tafsir/index.json','./data/hadith/ara-nawawi.min.json'];
 self.addEventListener('install', event => {
   event.waitUntil((async()=>{
     const cache=await caches.open(CACHE_NAME);
     for(const file of APP_FILES){try{await cache.add(file)}catch(error){console.warn(`Could not cache ${file}:`,error)}}
   })());
   self.skipWaiting();
+});
+self.addEventListener('message', event => {
+  if(!event.data||event.data.type!=='precache-data')return;
+  event.waitUntil((async()=>{
+    const cache=await caches.open(CACHE_NAME);
+    for(const file of DATA_FILES){try{if(!(await cache.match(file)))await cache.add(file)}catch(error){console.warn(`Could not cache ${file}:`,error)}}
+  })());
 });
 self.addEventListener('activate', event => {
   event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(key => (key.startsWith('mishkat-app-') && key !== CACHE_NAME) || key === 'mishkat-quran-v3' || key === 'mishkat-hadith-local-v1').map(key => caches.delete(key)))));

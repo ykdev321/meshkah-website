@@ -550,11 +550,42 @@
     }
   }
 
-  // Offline page download plan: page 1 is fetched first and awaited, then the
-  // first 200 pages as the priority batch, then the remaining pages continue
-  // in the background so the whole mushaf stays available offline.
-  const OFFLINE_PRIORITY_PAGES = 200;
-  const OFFLINE_CONTINUE_AFTER_PRIORITY = true;
+  // Offline page download plan (staged, to keep weak phones smooth):
+  // the surah the reader is on plus the one before and after it come first,
+  // then three more surahs (nearest first) every minute until all 604 pages are
+  // saved. Lite mode (weak devices) only saves the first three surahs.
+  const OFFLINE_BATCH_SURAHS = 3;
+  const OFFLINE_BATCH_DELAY_MS = 60000;
+  const OFFLINE_START_DELAY_MS = 4000;
+  const IS_LITE = document.documentElement.classList.contains('lite');
+
+  function surahPageRange(surahId) {
+    const surah = getSurah(surahId);
+    const count = surah?.array?.length || 1;
+    const first = pageIndexForVerse(surahId, 1) + 1;
+    const last = pageIndexForVerse(surahId, count) + 1;
+    return [Math.max(1, Math.min(604, first)), Math.max(1, Math.min(604, Math.max(first, last)))];
+  }
+
+  function offlineSurahOrder(centerSurah) {
+    const total = state.quran.length || 114;
+    const center = Math.max(1, Math.min(total, Number(centerSurah) || 1));
+    const order = [center];
+    for (let step = 1; order.length < total; step++) {
+      if (center + step <= total) order.push(center + step);
+      if (center - step >= 1) order.push(center - step);
+      if (center + step > total && center - step < 1) break;
+    }
+    return order;
+  }
+
+  function waitWhileHidden() {
+    return new Promise(resolve => {
+      if (!document.hidden) { resolve(); return; }
+      const onVisible = () => { if (!document.hidden) { document.removeEventListener('visibilitychange', onVisible); resolve(); } };
+      document.addEventListener('visibilitychange', onVisible);
+    });
+  }
 
   async function precacheAllMushafPages() {
     if (!('caches' in window) || !navigator.onLine) return;
@@ -568,22 +599,15 @@
     catch (error) { console.info('Browser cache storage is unavailable; page layouts cannot be saved offline.', error); return; }
     const primary = page => `./data/pages/page-${String(page).padStart(3, '0')}.json`;
     const fallback = page => `https://raw.githubusercontent.com/ouryhamdalaye/madinah-mushaf-json/main/pages/page-${String(page).padStart(3, '0')}.json`;
-    let completed = 0;
+    const done = new Set();
     let failed = 0;
-    const lastPlannedPage = OFFLINE_CONTINUE_AFTER_PRIORITY ? 604 : OFFLINE_PRIORITY_PAGES;
-    const order = [1, ...Array.from({ length: lastPlannedPage - 1 }, (_, index) => index + 2)];
-    let cursor = 0;
-    showToast(`يبدأ حفظ صفحات المصحف من الصفحة ١ ثم أول ${toArabicDigits(OFFLINE_PRIORITY_PAGES)} صفحة للاستخدام دون اتصال...`);
     async function cachePage(page) {
       const key = primary(page);
       try {
         const cached = await cache.match(key);
         if (cached) {
           const saved = await cached.clone().json();
-          if (saved?.page === page && Array.isArray(saved.lines) && Array.isArray(saved.verses)) {
-            completed++;
-            return;
-          }
+          if (saved?.page === page && Array.isArray(saved.lines) && Array.isArray(saved.verses)) { done.add(page); return; }
         }
         let data = null;
         let lastError = null;
@@ -599,36 +623,52 @@
         }
         if (!data) throw lastError || new Error('تعذر تحميل الصفحة');
         await cache.put(key, new Response(JSON.stringify(data), { status: 200, headers: { 'Content-Type': 'application/json; charset=utf-8' } }));
-        completed++;
-        if (completed % 50 === 0 || completed === OFFLINE_PRIORITY_PAGES) { writeStorage(completedKey, { complete: false, pages: completed, failed, savedAt: new Date().toISOString() }); updateDashboardProgress(); console.info(`Mishkat offline pages cached: ${completed}/${lastPlannedPage}`); }
+        done.add(page);
       } catch (error) {
         failed++;
         console.info(`Could not cache Mushaf page ${page}:`, error);
       }
     }
-    async function worker() {
-      while (cursor < order.length) {
-        const page = order[cursor++];
-        await cachePage(page);
-      }
+    const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection || {};
+    const lowMemory = Number(navigator.deviceMemory || 4) <= 2;
+    const slowNetwork = connection.saveData || ['slow-2g', '2g'].includes(connection.effectiveType);
+    const workers = (IS_LITE || lowMemory || slowNetwork) ? 1 : 2;
+    const onlyFirstBatch = IS_LITE || Boolean(connection.saveData);
+    async function runBatch(pages) {
+      let cursor = 0;
+      async function worker() { while (cursor < pages.length) await cachePage(pages[cursor++]); }
+      await Promise.all(Array.from({ length: workers }, () => worker()));
     }
     try {
-      const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection || {};
-      const lowMemory = Number(navigator.deviceMemory || 4) <= 2;
-      const slowNetwork = connection.saveData || ['slow-2g', '2g'].includes(connection.effectiveType);
-      const workers = (lowMemory || slowNetwork) ? 1 : 2;
-      // Page 1 is downloaded on its own first so it is ready immediately.
-      await cachePage(order[cursor++]);
-      await Promise.all(Array.from({ length: workers }, () => worker()));
-      if (completed >= OFFLINE_PRIORITY_PAGES) {
-        showToast(`اكتمل حفظ أول ${toArabicDigits(Math.min(completed, OFFLINE_PRIORITY_PAGES))} صفحة من المصحف للاستخدام دون اتصال.`);
+      await new Promise(resolve => setTimeout(resolve, OFFLINE_START_DELAY_MS));
+      const surahOrder = offlineSurahOrder(state.activeSurah);
+      const planned = new Set();
+      let announced = false;
+      for (let i = 0; i < surahOrder.length; i += OFFLINE_BATCH_SURAHS) {
+        if (!navigator.onLine) throw new Error('offline');
+        await waitWhileHidden();
+        const pages = [];
+        surahOrder.slice(i, i + OFFLINE_BATCH_SURAHS).forEach(surahId => {
+          const [first, last] = surahPageRange(surahId);
+          for (let page = first; page <= last; page++) if (!planned.has(page)) { planned.add(page); pages.push(page); }
+        });
+        if (pages.length) {
+          if (!announced && !onlyFirstBatch) { announced = true; showToast('يبدأ حفظ صفحات المصحف على دفعات صغيرة للاستخدام دون اتصال...'); }
+          await runBatch(pages);
+          writeStorage(completedKey, { complete: false, pages: done.size, failed, savedAt: new Date().toISOString() });
+          updateDashboardProgress();
+          console.info(`Mishkat offline pages cached: ${done.size}/604`);
+        }
+        if (onlyFirstBatch) return;
+        if (i + OFFLINE_BATCH_SURAHS < surahOrder.length) await new Promise(resolve => setTimeout(resolve, OFFLINE_BATCH_DELAY_MS));
       }
-      if (completed === 604 && failed === 0) {
+      if (done.size === 604 && failed === 0) {
         writeStorage(completedKey, { complete: true, pages: 604, savedAt: new Date().toISOString() });
+        updateDashboardProgress();
         showToast('اكتمل حفظ صفحات المصحف الـ604 للاستخدام دون اتصال.');
       } else {
-        writeStorage(completedKey, { complete: false, pages: completed, failed, savedAt: new Date().toISOString() });
-        if (completed < 604) showToast(`تم حفظ ${toArabicDigits(completed)} من ٦٠٤ صفحة؛ سيُستكمل الحفظ عند توفر الإنترنت.`);
+        writeStorage(completedKey, { complete: false, pages: done.size, failed, savedAt: new Date().toISOString() });
+        if (done.size < 604) showToast(`تم حفظ ${toArabicDigits(done.size)} من ٦٠٤ صفحة؛ سيُستكمل الحفظ عند توفر الإنترنت.`);
       }
     } catch (error) {
       console.info('Mushaf page pre-caching interrupted; it will resume on the next visit.', error);
@@ -2131,6 +2171,11 @@
   function registerServiceWorker() {
     if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
       navigator.serviceWorker.register('service-worker.js').catch(error => console.info('Service worker not registered:', error));
+      // Ask the worker to save the big offline data files only after the page has settled.
+      const askForDataPrecache = () => setTimeout(() => {
+        navigator.serviceWorker.ready.then(reg => reg.active && reg.active.postMessage({ type: 'precache-data' })).catch(() => {});
+      }, IS_LITE ? 15000 : 8000);
+      if (document.readyState === 'complete') askForDataPrecache(); else window.addEventListener('load', askForDataPrecache, { once: true });
     }
   }
 
