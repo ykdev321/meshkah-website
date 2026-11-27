@@ -1,0 +1,35 @@
+# Repeat-visit caching. Entry points and code stay revalidated on every load
+# so updates (and the service worker version bump) reach users immediately.
+
+/
+  Cache-Control: public, max-age=0, must-revalidate
+/*.html
+  Cache-Control: public, max-age=0, must-revalidate
+/service-worker.js
+  Cache-Control: public, max-age=0, must-revalidate
+/manifest.webmanifest
+  Cache-Control: public, max-age=0, must-revalidate
+/assets/*.js
+  Cache-Control: public, max-age=0, must-revalidate
+/assets/*.css
+  Cache-Control: public, max-age=0, must-revalidate
+
+# Fonts never change under the same filename: cache for a year.
+/assets/fonts/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Icons and images: 30 days.
+/icons/*
+  Cache-Control: public, max-age=2592000
+
+# Large static data: serve from cache for a day, refresh in the background after.
+/data/quran.json
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+/data/reciters.json
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+/data/verse-to-page.json
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+/data/tafsir/*
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+/data/hadith/*
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
