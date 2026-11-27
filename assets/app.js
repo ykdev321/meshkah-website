@@ -37,7 +37,7 @@
     isSeeking: false,
     toastTimer: null,
     fontSize: Number(readStorage(STORAGE.font, DEFAULT_QURAN_FONT_SIZE)) || DEFAULT_QURAN_FONT_SIZE,
-    flatVerses: [], flatIndex: new Map(), pageStarts: [], pageIndex: 0, pageMapOfficial: false,
+    showAllSurahs: false, showAllStudioSurahs: false, flatVerses: [], flatIndex: new Map(), pageStarts: [], pageIndex: 0, pageMapOfficial: false,
     pageEntries: [], pageLayouts: new Map(), currentPageLayout: null, pageRenderToken: 0, pageSyncPending: null, wordOverrides: new Map(),
     pageRepeat: false, repeatSegments: [], repeatSegmentIndex: 0, repeatTransitionPending: false, activeWordKey: null,
     focusMode: false, focusReturnScroll: 0,
@@ -329,7 +329,6 @@
       if ($('#studio-volume')) { $('#studio-volume').value = String(audio.volume); paintRangeFill($('#studio-volume')); }
       renderReciters();
       renderSurahList();
-      renderPageIndex();
       updateBookmarkCount();
       applyTheme(readStorage(STORAGE.theme, 'dark'));
       applyFontSize(state.fontSize, false);
@@ -381,6 +380,12 @@
     updatePlayerLabels();
   }
 
+  // Only the open surah and two before/after are drawn in the side lists until the
+  // reader asks for the rest (search or the "show all" button). Every surah stays
+  // reachable; this only keeps the page's DOM small.
+  const SURAH_WINDOW = 2;
+  function inSurahWindow(surah) { return Math.abs(Number(surah.id) - state.activeSurah) <= SURAH_WINDOW; }
+
   function renderSurahList() {
     const list = $('#surah-list');
     const search = normalizeArabic($('#surah-search').value);
@@ -388,7 +393,9 @@
       renderBookmarkList(list);
       return;
     }
+    const windowed = !search && !state.showAllSurahs;
     const filtered = state.quran.filter(surah => {
+      if (windowed) return inSurahWindow(surah);
       if (!search) return true;
       const text = normalizeArabic(`${surah.id} ${surah.name} ${surah.name_en} ${surah.name_translation}`);
       return text.includes(search);
@@ -428,7 +435,8 @@
         <span class="surah-item-copy"><strong>${escapeHTML(surah.name)} · الآية ${toArabicDigits(verse.id)}</strong><small>${escapeHTML(verse.ar.slice(0, 60))}${verse.ar.length > 60 ? '…' : ''}</small></span>
         <span class="surah-item-meta">${toArabicDigits(verse.id)}</span>
       </button>`).join('') : '';
-    list.innerHTML = surahHtml + verseHtml;
+    const moreHtml = windowed ? `<button class="surah-item show-all-surahs" data-show-all-surahs type="button"><span class="surah-item-copy"><strong>عرض كل السور (${toArabicDigits(state.quran.length)})</strong></span></button>` : '';
+    list.innerHTML = surahHtml + moreHtml + verseHtml;
   }
 
   function renderBookmarkList(target) {
@@ -1778,10 +1786,14 @@
     const host = $('#studio-surah-list');
     if (!host) return;
     const q = normalizeArabic(query);
-    const items = state.quran.filter(surah => !q || normalizeArabic(`${surah.name} ${surah.name_en || ''} ${surah.name_translation || ''} ${surah.id}`).includes(q));
-    host.innerHTML = items.map(surah => `<button class="studio-list-item studio-surah-item ${Number(surah.id) === state.activeSurah ? 'active' : ''}" data-studio-surah="${surah.id}" aria-pressed="${Number(surah.id) === state.activeSurah}"><span class="studio-surah-number">${dashboardNumber(surah.id)}</span><span class="studio-item-copy"><strong>${escapeHTML(surah.name)}</strong><small>${escapeHTML(String(surah.type || ''))} · ${dashboardNumber(surah.array?.length || 0)} آية</small></span>${Number(surah.id) === state.activeSurah ? '<span class="studio-item-check">✓</span>' : ''}</button>`).join('') || '<p class="dashboard-note">لا توجد سورة بهذا الاسم.</p>';
+    const windowed = !q && !state.showAllStudioSurahs;
+    state.studioWindowCenter = state.activeSurah;
+    const items = state.quran.filter(surah => windowed ? inSurahWindow(surah) : (!q || normalizeArabic(`${surah.name} ${surah.name_en || ''} ${surah.name_translation || ''} ${surah.id}`).includes(q)));
+    const more = windowed ? `<button class="studio-list-item studio-surah-item" data-studio-show-all type="button"><span class="studio-item-copy"><strong>عرض كل السور (${dashboardNumber(state.quran.length)})</strong></span></button>` : '';
+    host.innerHTML = items.map(surah => `<button class="studio-list-item studio-surah-item ${Number(surah.id) === state.activeSurah ? 'active' : ''}" data-studio-surah="${surah.id}" aria-pressed="${Number(surah.id) === state.activeSurah}"><span class="studio-surah-number">${dashboardNumber(surah.id)}</span><span class="studio-item-copy"><strong>${escapeHTML(surah.name)}</strong><small>${escapeHTML(String(surah.type || ''))} · ${dashboardNumber(surah.array?.length || 0)} آية</small></span>${Number(surah.id) === state.activeSurah ? '<span class="studio-item-check">✓</span>' : ''}</button>`).join('') + more || '<p class="dashboard-note">لا توجد سورة بهذا الاسم.</p>';
   }
   function updatePlayerStudioSelection() {
+    if (!state.showAllStudioSurahs && !($('#studio-surah-search')?.value || '') && state.studioWindowCenter !== state.activeSurah) renderStudioSurahList('');
     const reciter = getReciter();
     const surah = getSurah(state.activeSurah);
     $$('[data-studio-reciter]').forEach(item => {
@@ -2181,6 +2193,7 @@
 
   // Events: library and verse controls.
   $('#surah-list').addEventListener('click', async event => {
+    if (event.target.closest('[data-show-all-surahs]')) { state.showAllSurahs = true; renderSurahList(); return; }
     const surahButton = event.target.closest('[data-open-surah]');
     if (surahButton) {
       if (state.pageRepeat) stopPageRepeat();
@@ -2396,7 +2409,7 @@
   $('#album-open-mushaf')?.addEventListener('click', () => { setNavState('reader'); scrollToReader(); });
   $('#album-repeat')?.addEventListener('click', () => { state.playerRepeat=!state.playerRepeat; if(state.playerRepeat) state.playerAutoNext=false; updatePlayerModeButtons(); });
   $('#album-auto-next')?.addEventListener('click', () => { state.playerAutoNext=!state.playerAutoNext; if(state.playerAutoNext) state.playerRepeat=false; updatePlayerModeButtons(); });
-  $('#studio-surah-list')?.addEventListener('click', event => { const item=event.target.closest('[data-studio-surah]'); if(item) selectStudioSurah(item.dataset.studioSurah); });
+  $('#studio-surah-list')?.addEventListener('click', event => { if (event.target.closest('[data-studio-show-all]')) { state.showAllStudioSurahs = true; renderStudioSurahList(''); return; } const item=event.target.closest('[data-studio-surah]'); if(item) selectStudioSurah(item.dataset.studioSurah); });
   $('#studio-reciter-list')?.addEventListener('click', event => { const item=event.target.closest('[data-studio-reciter]'); if(item) selectStudioReciter(item.dataset.studioReciter); });
   $('#studio-surah-search')?.addEventListener('input', event => renderStudioSurahList(event.target.value));
   $('#studio-reciter-search')?.addEventListener('input', event => renderStudioReciterList(event.target.value));
