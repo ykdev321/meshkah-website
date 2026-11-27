@@ -1,11 +1,11 @@
-// Mishkat v8.3 — keeps every downloaded hadith edition side by side and falls back to the app shell for the bundled one.
-const CACHE_NAME = 'mishkat-app-v8-4-0-onboarding-tour';
+// Mishkat v8.5 — cross-page audio continuity, social share cards, actionable audio errors; keeps every downloaded hadith edition side by side and falls back to the app shell for the bundled one.
+const CACHE_NAME = 'mishkat-app-v8-5-0-audio-continuity';
 const TAFSIR_CACHE = 'mishkat-tafsir-v1';
 const HADITH_CACHE = 'mishkat-hadith-local-v2';
 const APP_FILES = [
-  './','./index.html','./player.html','./about.html','./privacy.html','./hadith.html','./tafsir.html','./assets/styles.css','./assets/app.js','./assets/about.js','./assets/hadith.js','./assets/tafsir.js',
+  './','./index.html','./player.html','./about.html','./privacy.html','./hadith.html','./tafsir.html','./assets/styles.css','./assets/app.js','./assets/audio-continuity.js','./assets/about.js','./assets/hadith.js','./assets/tafsir.js',
   './assets/fonts/readex-pro-ar.woff2','./assets/fonts/readex-pro-latin.woff2','./assets/fonts/amiri-400-ar.woff2','./assets/fonts/amiri-700-ar.woff2','./assets/fonts/noto-naskh-arabic-ar.woff2',
-  './manifest.webmanifest','./icons/favicon.svg','./icons/logo-mishkat.png','./data/quran.json','./data/reciters.json','./data/verse-to-page.json','./data/tafsir/index.json','./data/hadith/ara-nawawi.min.json'
+  './manifest.webmanifest','./icons/favicon.svg','./icons/logo-mishkat.png','./icons/og-cover.jpg','./data/quran.json','./data/reciters.json','./data/verse-to-page.json','./data/tafsir/index.json','./data/hadith/ara-nawawi.min.json'
 ];
 self.addEventListener('install', event => {
   event.waitUntil((async()=>{

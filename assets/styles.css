@@ -1435,3 +1435,80 @@ body.player-standalone .main-nav .nav-link[data-nav="listen"]{border-color:rgba(
 .tour-skip { position: fixed; top: 12px; left: 50%; transform: translateX(-50%); z-index: 153; padding: 9px 22px; border-radius: 999px; border: 1px solid var(--glass-border); background: var(--glass-strong); color: var(--ink); font-family: var(--sans); font-size: 14px; font-weight: 600; cursor: pointer; box-shadow: var(--glass-shadow); backdrop-filter: blur(var(--blur)); -webkit-backdrop-filter: blur(var(--blur)); }
 .tour-skip:hover { color: var(--accent-strong); border-color: rgba(var(--accent-rgb), .45); }
 @media (prefers-reduced-motion: reduce) { .tour-spotlight { animation: none; } }
+
+/* ===== v8.5: cross-page mini player + actionable audio errors ===== */
+.continuity-bar {
+  position: fixed;
+  inset-inline: 12px;
+  bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+  z-index: 85;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 560px;
+  margin-inline: auto;
+  padding: 8px 10px;
+  border-radius: 16px;
+  background: var(--glass-strong);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  backdrop-filter: blur(var(--blur));
+  -webkit-backdrop-filter: blur(var(--blur));
+  color: var(--ink);
+  font-family: var(--sans);
+}
+body.has-continuity-bar { padding-bottom: 84px; }
+.continuity-toggle {
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+  display: inline-grid;
+  place-items: center;
+  border: none;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--accent-ink);
+  cursor: pointer;
+  transition: background-color .2s, transform .2s;
+}
+.continuity-toggle:hover { background: var(--accent-strong); transform: translateY(-1px); }
+.continuity-toggle svg { width: 19px; height: 19px; }
+.continuity-copy { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.continuity-copy strong { font-size: 13.5px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.continuity-copy small { color: var(--muted); font-size: 11px; line-height: 1.6; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.continuity-bar.continuity-error .continuity-copy small { color: var(--rose); white-space: normal; }
+.continuity-time { color: var(--accent); font-size: 12px; font-variant-numeric: tabular-nums; flex: 0 0 auto; }
+.continuity-open, .continuity-close {
+  width: 32px;
+  height: 32px;
+  flex: 0 0 32px;
+  display: inline-grid;
+  place-items: center;
+  border: 1px solid var(--faint);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition: background-color .2s, border-color .2s, color .2s;
+}
+.continuity-open:hover, .continuity-close:hover { color: var(--accent-strong); border-color: rgba(var(--accent-rgb), .42); background: var(--wash); }
+.continuity-open svg, .continuity-close svg { width: 16px; height: 16px; }
+body.light-theme .continuity-bar { background: rgba(250, 247, 240, .94); border-color: rgba(23, 26, 24, .14); }
+
+.reader-message { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; justify-content: space-between; }
+.reader-message[hidden] { display: none; }
+.reader-message-text { flex: 1 1 220px; }
+.reader-message-actions { display: flex; gap: 8px; flex: 0 0 auto; }
+.reader-message-btn {
+  border: 1px solid rgba(var(--accent-rgb), .45);
+  border-radius: 10px;
+  background: rgba(var(--accent-rgb), .12);
+  color: var(--accent-strong);
+  padding: 5px 12px;
+  font-family: inherit;
+  font-size: 10.5px;
+  line-height: 1.6;
+  cursor: pointer;
+  transition: background-color .2s, border-color .2s;
+}
+.reader-message-btn:hover { background: rgba(var(--accent-rgb), .22); border-color: rgba(var(--accent-rgb), .65); }

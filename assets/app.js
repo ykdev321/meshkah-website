@@ -14,6 +14,7 @@
     lastListened: 'mishkat.lastListened.v1',
     readPages: 'mishkat.readPages.v1',
     audioVolume: 'mishkat.audioVolume.v1',
+    audioSession: 'mishkat.audioSession.v1',
     lastView: 'mishkat.lastView.v1'
   };
 
@@ -43,6 +44,7 @@
     heardAyahs: new Set(readStorage('mishkat.heardAyahs.v1', [])),
     lastListened: readStorage('mishkat.lastListened.v1', null),
     lastCountedListenKey: null, isFullSurahPlaying: false, playerRepeat: false, playerAutoNext: true,
+    audioErrorPending: false, lastPlayAttempt: null,
     tafsirCache: new Map(), tafsirPending: new Map(), tafsirIndex: null, hadiths: [], selectedHadith: 0, hadithCollectionId: 'nawawi', hadithCollectionName: 'الأربعون النووية', hadithCollectionCache: new Map(), dailyVerse: null,
     readPageRecords: readStorage('mishkat.readPages.v1', {}), lastConfirmedRead: null, previousVolume: 0.85,
   };
@@ -349,6 +351,7 @@
       updatePlayerLabels();
       updatePlayButton();
       if (document.body.classList.contains('player-standalone')) showDashboardView('player');
+      await restoreAudioSession();
       registerServiceWorker();
       startOnboardingTour();
       // Use the canonical Madinah Mushaf page starts when available. The reader remains usable if it is offline.
@@ -1044,6 +1047,155 @@
     return reciter?.audio?.surah_urls?.[String(surahId)] || null;
   }
 
+  // Cross-page playback continuity (v8.5): the live session is saved here so
+  // any other page of the site can pick the recitation up where it stopped.
+  let audioSessionLastSave = 0;
+  let audioStallTimer = 0;
+
+  function saveAudioSession() {
+    if (!state.currentSource) return;
+    const reciter = getReciter();
+    const surah = getSurah(state.activeSurah);
+    writeStorage(STORAGE.audioSession, {
+      v: 1,
+      url: state.currentSource,
+      reciterId: reciter?.id || null,
+      reciterName: reciter?.name_ar || '',
+      surah: state.activeSurah,
+      surahName: surah?.name || '',
+      ayah: state.activeAyah,
+      time: audio.currentTime || 0,
+      playing: !audio.paused && !audio.ended,
+      rate: audio.playbackRate || 1,
+      mode: state.isFullSurahPlaying ? 'surah' : (state.clipEnd ? 'clip' : 'free'),
+      clipEnd: state.clipEnd || null,
+      at: Date.now()
+    });
+  }
+
+  function saveAudioSessionThrottled(force = false) {
+    const now = Date.now();
+    if (force || now - audioSessionLastSave > 2000) { audioSessionLastSave = now; saveAudioSession(); }
+  }
+
+  function clearAudioStallWatch() {
+    if (audioStallTimer) { clearTimeout(audioStallTimer); audioStallTimer = 0; }
+  }
+
+  function armAudioStallWatch() {
+    clearAudioStallWatch();
+    audioStallTimer = setTimeout(() => {
+      audioStallTimer = 0;
+      if (!audio.paused && !audio.ended && state.currentSource) {
+        showAudioError('توقّف بث الصوت عن التقدّم؛ يبدو أن الاتصال بخادم التلاوة انقطع أو أن الخادم لا يستجيب.', { kind: 'position', time: audio.currentTime || 0 });
+      }
+    }, 15000);
+  }
+
+  function showAudioError(message, attempt) {
+    if (attempt) state.lastPlayAttempt = attempt;
+    state.audioErrorPending = true;
+    const box = $('#reader-message');
+    if (!box) return;
+    box.innerHTML = '';
+    const text = document.createElement('span');
+    text.className = 'reader-message-text';
+    text.textContent = message;
+    const actions = document.createElement('span');
+    actions.className = 'reader-message-actions';
+    const retry = document.createElement('button');
+    retry.type = 'button';
+    retry.className = 'reader-message-btn';
+    retry.textContent = 'إعادة المحاولة';
+    retry.addEventListener('click', () => { retryLastPlayback(); });
+    const choose = document.createElement('button');
+    choose.type = 'button';
+    choose.className = 'reader-message-btn';
+    choose.textContent = 'اختر قارئًا آخر';
+    choose.addEventListener('click', () => { openReciterDialog(); });
+    actions.append(retry, choose);
+    box.append(text, actions);
+    box.hidden = false;
+  }
+
+  async function retryLastPlayback() {
+    const attempt = state.lastPlayAttempt;
+    hideReaderMessage();
+    try {
+      if (attempt?.kind === 'ayah' && getVerse(attempt.surahId || state.activeSurah, attempt.ayahId)) {
+        if (Number(attempt.surahId) && Number(attempt.surahId) !== state.activeSurah) await openSurah(Number(attempt.surahId), Number(attempt.ayahId), false);
+        return await playAyah(Number(attempt.ayahId));
+      }
+      await ensureChapterTiming();
+      // After a load failure the media element is stuck in its error state;
+      // force a fresh fetch of the same catalog URL instead of waiting on it.
+      if (audio.error || audio.networkState === 3) {
+        state.currentSource = null;
+        audio.removeAttribute('src');
+        audio.load();
+      }
+      await ensureAudioSource(state.activeSurah);
+      if (attempt && Number.isFinite(attempt.time) && attempt.time > 0) {
+        const ceiling = Number.isFinite(audio.duration) && audio.duration > 0 ? audio.duration - 0.5 : attempt.time;
+        audio.currentTime = Math.max(0, Math.min(attempt.time, ceiling));
+      }
+      await audio.play();
+      updatePlayButton();
+      updatePlayerLabels();
+    } catch (error) {
+      showAudioError(`ما زال التشغيل متعذّرًا: ${error.message}`, state.lastPlayAttempt);
+    }
+  }
+
+  async function restoreAudioSession() {
+    const session = readStorage(STORAGE.audioSession, null);
+    if (!session || session.playing !== true) return;
+    if (!Number.isFinite(Number(session.at)) || Date.now() - Number(session.at) > 60000) return;
+    const surahId = Number(session.surah);
+    if (!getSurah(surahId)) return;
+    const url = typeof session.url === 'string' ? session.url : '';
+    if (!url) return;
+    try {
+      if (session.reciterId && session.reciterId !== state.reciterId && state.reciters.some(reciter => reciter.id === session.reciterId)) {
+        state.reciterId = session.reciterId;
+        renderReciters();
+      }
+      // Only resume when the saved source is still this reciter's catalog URL
+      // for the surah; reciter audio links are never invented or rewritten.
+      if (getAudioUrl(surahId) !== url) return;
+      await openSurah(surahId, Number(session.ayah) || 1, false);
+      await ensureChapterTiming();
+      await ensureAudioSource(surahId);
+      audio.currentTime = Math.max(0, Number(session.time) || 0);
+      const rate = Number(session.rate);
+      if (rate > 0) {
+        audio.playbackRate = rate;
+        for (const select of [$('#playback-speed'), $('#studio-speed')]) {
+          if (select && Array.from(select.options || []).some(option => Number(option.value) === rate)) select.value = String(session.rate);
+        }
+      }
+      state.clipEnd = session.mode === 'clip' && Number(session.clipEnd) > audio.currentTime ? Number(session.clipEnd) : null;
+      state.isFullSurahPlaying = session.mode === 'surah';
+      state.lastPlayAttempt = { kind: 'position', time: audio.currentTime };
+      await audio.play();
+      updatePlayerLabels();
+      updatePlayButton();
+      showToast(`استئناف تلاوة سورة ${getSurah(surahId).name}`);
+    } catch (error) {
+      state.isFullSurahPlaying = false;
+      updatePlayButton();
+      updatePlayerLabels();
+      if (error && error.name === 'NotAllowedError') {
+        // The browser wants one tap before sound; keep the session alive so
+        // the next page (or the play button here) can resume within its window.
+        writeStorage(STORAGE.audioSession, session);
+        showToast('اضغط زر التشغيل لمتابعة التلاوة من حيث توقفت.');
+      } else {
+        showAudioError(`تعذّر استئناف التلاوة: ${error.message}`, { kind: 'position', time: Number(session.time) || 0 });
+      }
+    }
+  }
+
   function waitForAudioMetadata() {
     if (audio.readyState >= 1) return Promise.resolve();
     return new Promise((resolve, reject) => {
@@ -1091,7 +1243,8 @@
       updatePlayButton();
       showToast(`بدأت تلاوة سورة ${getSurah(state.activeSurah).name}`);
     } catch (error) {
-      showReaderMessage(`تعذر بدء التلاوة: ${error.message} تحقق من اتصال الإنترنت أو جرّب قارئًا آخر.`);
+      state.isFullSurahPlaying = false;
+      showAudioError(`تعذّر بدء التلاوة: ${error.message} تحقق من اتصال الإنترنت أو جرّب قارئًا آخر.`, { kind: 'position', time: 0 });
       updatePlayButton();
     }
   }
@@ -1159,6 +1312,7 @@
       setActiveVerse(ayahId, true);
       return;
     }
+    state.lastPlayAttempt = { kind: 'ayah', surahId: state.activeSurah, ayahId: Number(ayahId) };
     try {
       await ensureAudioSource(state.activeSurah);
       state.clipEnd = row.end / 1000;
@@ -1169,7 +1323,7 @@
       updatePlayerLabels();
     } catch (error) {
       state.clipEnd = null;
-      showReaderMessage(`تعذر تشغيل الآية: ${error.message} تحقق من اتصال الإنترنت أو جرّب قارئًا آخر.`);
+      showAudioError(`تعذّر تشغيل الآية: ${error.message} تحقق من اتصال الإنترنت أو جرّب قارئًا آخر.`, { kind: 'ayah', surahId: state.activeSurah, ayahId: Number(ayahId) });
       updatePlayButton();
     }
   }
@@ -1404,7 +1558,7 @@
         await audio.play();
         updatePlayButton();
       } catch (error) {
-        showReaderMessage(`تعذر استئناف الصوت: ${error.message}`);
+        showAudioError(`تعذّر استئناف الصوت: ${error.message}`, { kind: 'position', time: audio.currentTime || 0 });
       }
     } else {
       audio.pause();
@@ -2056,9 +2210,21 @@
   });
   audio.addEventListener('error', () => {
     state.isFullSurahPlaying = false;
-    if (state.currentSource) showReaderMessage('لم يتمكن المتصفح من تشغيل رابط الصوت الحالي. قد يكون الخادم الخارجي متوقفًا مؤقتًا أو يتطلب اتصالًا مختلفًا؛ جرّب قارئًا آخر.');
+    clearAudioStallWatch();
+    if (state.currentSource) showAudioError('تعذّر تحميل الصوت من خادم هذا القارئ؛ قد يكون الخادم متوقفًا مؤقتًا أو الرابط لا يعمل حاليًا.', { kind: 'position', time: audio.currentTime || 0 });
     updatePlayButton();
   });
+  audio.addEventListener('timeupdate', () => saveAudioSessionThrottled(false));
+  audio.addEventListener('play', () => { if (state.audioErrorPending) { state.audioErrorPending = false; hideReaderMessage(); } saveAudioSessionThrottled(true); });
+  audio.addEventListener('pause', () => { clearAudioStallWatch(); saveAudioSessionThrottled(true); });
+  audio.addEventListener('ended', () => saveAudioSessionThrottled(true));
+  audio.addEventListener('ratechange', () => saveAudioSessionThrottled(true));
+  audio.addEventListener('waiting', () => { if (!audio.paused && !audio.ended) armAudioStallWatch(); });
+  audio.addEventListener('stalled', () => { if (!audio.paused && !audio.ended) armAudioStallWatch(); });
+  audio.addEventListener('playing', clearAudioStallWatch);
+  audio.addEventListener('timeupdate', clearAudioStallWatch);
+  window.addEventListener('pagehide', () => saveAudioSessionThrottled(true));
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') saveAudioSessionThrottled(true); });
   $('#audio-progress').addEventListener('input', () => {
     state.isSeeking = true;
     $('#current-time').textContent = formatTime((Number($('#audio-progress').value) / 1000) * (audio.duration || 0));
@@ -2073,6 +2239,9 @@
 
   $('#reciter-select').addEventListener('change', async event => {
     const currentAyah = state.activeAyah;
+    const retryAfterError = state.audioErrorPending && state.lastPlayAttempt;
+    state.audioErrorPending = false;
+    hideReaderMessage();
     state.isFullSurahPlaying = false;
     state.reciterId = event.target.value;
     if (state.pageRepeat) stopPageRepeat();
@@ -2090,6 +2259,7 @@
     setActiveVerse(currentAyah, false);
     renderReader();
     updateDashboardProgress();
+    if (retryAfterError) retryLastPlayback();
   });
 
   $('#translation-toggle').addEventListener('click', () => {

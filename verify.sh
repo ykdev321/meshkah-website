@@ -6,6 +6,7 @@ node --check assets/app.js
 node --check assets/about.js
 node --check assets/hadith.js
 node --check assets/tafsir.js
+node --check assets/audio-continuity.js
 node --check service-worker.js
 bash -n tools/download-hadith-collections.sh
 bash -n tools/download-nawawi40.sh
@@ -75,7 +76,7 @@ assert 'hadith-collection' in pages['hadith.html'] and 'hadith-list' in pages['h
 assert 'tafsir-entries' in pages['tafsir.html'] and 'quran-content' in pages['tafsir.html']
 assert 'hadith.html' in (root/'index.html').read_text(encoding='utf-8') and 'tafsir.html' in (root/'index.html').read_text(encoding='utf-8')
 assert 'privacy.html' in (root/'service-worker.js').read_text(encoding='utf-8')
-assert 'mishkat-app-v8-2-hadith-tafsir' in (root/'service-worker.js').read_text(encoding='utf-8')
+assert 'mishkat-app-v8-5-0-audio-continuity' in (root/'service-worker.js').read_text(encoding='utf-8')
 
 app = (root/'assets/app.js').read_text(encoding='utf-8')
 used = set(re.findall(r"\$\(['\"]#([\w-]+)['\"]\)", app))
@@ -92,7 +93,7 @@ assert not (used - pages['player.html']), f'missing player IDs: {sorted(used-pag
 assert 'mishkat.playerLaunchTarget.v1' in app and "location.href = 'player.html'" in app
 assert 'markCurrentPageRead' in app and 'selection.isCollapsed' in app
 assert 'range.intersectsNode(unit)' in app
-assert 'downloadPageImage' in app and 'renderSelectedTafsir' in app
+assert 'renderSelectedTafsir' in app
 for script_name, page_name in (('assets/hadith.js','hadith.html'), ('assets/tafsir.js','tafsir.html')):
     used_ids = set(re.findall(r"\$\(['\"]#([\w-]+)['\"]\)", (root/script_name).read_text(encoding='utf-8')))
     missing = used_ids - pages[page_name]

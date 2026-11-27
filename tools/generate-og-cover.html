@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<!-- Generates the 1200x630 social share image. Render headless, then
+     convert to icons/og-cover.jpg (JPEG q88, ~48 KB; the raw PNG is ~418 KB):
+       google-chrome --headless=new --disable-gpu --hide-scrollbars \
+         --window-size=1200,630 --virtual-time-budget=5000 \
+         --screenshot=/tmp/og-cover.png \
+         "file://$PWD/generate-og-cover.html"
+       python3 -c "from PIL import Image; Image.open('/tmp/og-cover.png').convert('RGB').save('icons/og-cover.jpg', quality=88, optimize=True, progressive=True)" -->
+<html dir="rtl" lang="ar">
+<head>
+<meta charset="utf-8"/>
+<style>
+@font-face {
+  font-family: "Amiri";
+  src: url("../assets/fonts/amiri-700-ar.woff2") format("woff2");
+  font-weight: 700;
+}
+@font-face {
+  font-family: "Readex Pro";
+  src: url("../assets/fonts/readex-pro-ar.woff2") format("woff2");
+  font-weight: 200 700;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { width: 1200px; height: 630px; overflow: hidden; }
+body {
+  position: relative;
+  background:
+    radial-gradient(ellipse at 50% -10%, rgba(229, 203, 146, .14), transparent 60%),
+    radial-gradient(ellipse at 88% 112%, rgba(229, 203, 146, .07), transparent 55%),
+    linear-gradient(155deg, #121416 0%, #0c0e10 54%, #111315 100%);
+  font-family: "Readex Pro", sans-serif;
+  color: #f3f1eb;
+}
+.frame {
+  position: absolute;
+  inset: 22px;
+  border: 1.5px solid rgba(229, 203, 146, .35);
+  border-radius: 26px;
+}
+.frame::after {
+  content: "";
+  position: absolute;
+  inset: 7px;
+  border: 1px solid rgba(229, 203, 146, .14);
+  border-radius: 20px;
+}
+.wrap {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 26px;
+}
+.logo {
+  width: 208px;
+  height: 208px;
+  filter: drop-shadow(0 0 46px rgba(229, 203, 146, .35));
+}
+.name {
+  font-family: "Amiri", serif;
+  font-weight: 700;
+  font-size: 118px;
+  line-height: 1.15;
+  color: #e5cb92;
+  text-shadow: 0 0 70px rgba(229, 203, 146, .22);
+}
+.tagline {
+  font-size: 34px;
+  font-weight: 300;
+  color: rgba(240, 234, 220, .82);
+  letter-spacing: .01em;
+}
+.rule {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  color: rgba(229, 203, 146, .8);
+  font-size: 24px;
+}
+.rule::before, .rule::after {
+  content: "";
+  width: 130px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(229, 203, 146, .55), transparent);
+}
+</style>
+</head>
+<body>
+<div class="frame"></div>
+<div class="wrap">
+  <img class="logo" src="../icons/logo-mishkat.png" alt=""/>
+  <div class="name">مشكاة</div>
+  <div class="rule"><span>۞</span></div>
+  <div class="tagline">رفيقك مع القرآن الكريم — قراءة وتلاوة متزامنة وتفسير وأحاديث</div>
+</div>
+</body>
+</html>
